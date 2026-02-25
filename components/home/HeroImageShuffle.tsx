@@ -46,7 +46,10 @@ export function HeroImageShuffle() {
 
   useEffect(() => {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (prefersReduced) return // Show static first image only
+    const isTouchOnly = window.matchMedia('(hover: none)').matches
+    // On touch devices (iPad, phones) always run shuffle so the main experience isn’t static.
+    // Only skip when user has reduce motion AND a hover-capable device (desktop).
+    if (prefersReduced && !isTouchOnly) return
     const interval = setInterval(() => {
       setStep((s) => s + 1)
     }, INTERVAL_MS)

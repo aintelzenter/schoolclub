@@ -66,7 +66,8 @@ main {
   animation: logo-marquee 25s linear infinite;
 }
 
-@media (prefers-reduced-motion: reduce) {
+/* Only disable on hover-capable devices; touch (iPad, phones) keeps animations */
+@media (prefers-reduced-motion: reduce) and (hover: hover) {
   .logo-marquee {
     animation: none;
   }
@@ -87,7 +88,7 @@ main {
   animation: section-heading-glow 2.5s ease-in-out infinite;
 }
 
-@media (prefers-reduced-motion: reduce) {
+@media (prefers-reduced-motion: reduce) and (hover: hover) {
   .about-section-heading {
     animation: none;
     text-shadow: 0 0 12px rgba(217, 70, 239, 0.3);
@@ -185,7 +186,7 @@ main {
 .hero-dot-pulse {
   animation: hero-dot-pulse 2.5s ease-in-out infinite;
 }
-@media (prefers-reduced-motion: reduce) {
+@media (prefers-reduced-motion: reduce) and (hover: hover) {
   .hero-dot-pulse {
     animation: none;
   }
@@ -247,7 +248,7 @@ main {
   transition-duration: 0.2s;
 }
 
-@media (prefers-reduced-motion: reduce) {
+@media (prefers-reduced-motion: reduce) and (hover: hover) {
   .doe-page-wrapper,
   .doe-page-wrapper *,
   .doe-page-wrapper *::before,
@@ -269,7 +270,7 @@ main {
   transition-duration: 0.2s;
 }
 
-@media (prefers-reduced-motion: reduce) {
+@media (prefers-reduced-motion: reduce) and (hover: hover) {
   .school-show-page-wrapper,
   .school-show-page-wrapper *,
   .school-show-page-wrapper *::before,
@@ -399,7 +400,7 @@ main {
   animation: beauty-sparkle-pop var(--p-dur, 2000ms) ease-in-out forwards;
 }
 
-@media (prefers-reduced-motion: reduce) {
+@media (prefers-reduced-motion: reduce) and (hover: hover) {
   .theme-eff,
   .beauty-sparkle-active {
     animation: none !important;
@@ -415,7 +416,7 @@ main {
   display: inline-block;
   animation: hero-btn-breathe 3.5s ease-in-out infinite;
 }
-@media (prefers-reduced-motion: reduce) {
+@media (prefers-reduced-motion: reduce) and (hover: hover) {
   .hero-btn-breathe {
     animation: none;
   }
