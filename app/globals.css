@@ -34,14 +34,9 @@ html {
   html {
     scroll-behavior: auto;
   }
-  
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+  /* Only reduce motion for specific high-motion elements (see below). We do NOT
+     override all * transitions/animations here, so normal UI animations still
+     work on mobile when the user has not enabled "Reduce motion". */
 }
 
 body {
