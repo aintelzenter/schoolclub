@@ -70,11 +70,14 @@ export function SpotlightCarousel({
       onPointerUp={handlePointerUp}
       onPointerLeave={() => setSwipeStart(null)}
     >
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 overflow-hidden">
         <img
           src={club.image}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover object-center"
+          className={cn(
+            'absolute inset-0 w-full h-full object-cover object-center',
+            club.id === 'school-show' && 'scale-125'
+          )}
           onError={(e) => {
             e.currentTarget.style.display = 'none'
           }}
@@ -130,7 +133,7 @@ export function SpotlightCarousel({
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2">
               {club.name}
             </h1>
-            <p className="text-lg md:text-xl text-white/95 line-clamp-2 mb-3">{club.tagline}</p>
+            <p className="text-lg md:text-xl text-white/95 mb-3">{club.tagline}</p>
             <span className="inline-flex items-center px-3 py-1 rounded-lg bg-white/15 text-white/90 text-sm font-medium border border-white/20">
               {club.yearGroup}
             </span>

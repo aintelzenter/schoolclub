@@ -6,14 +6,17 @@
 
 export type ClubTintRgb = { r: number; g: number; b: number }
 
-/** Explicit club color mapping — DO NOT reuse purple unless defined here */
+/** Explicit club color mapping — each club has a distinct hue (no two similar) */
 const TINT_HEX: Record<string, string> = {
-  'operation-smile': '#f6c445', // yellow / warm gold
+  'operation-smile': '#FFC107', // brighter saturated yellow (distinct from SPARK orange)
   tedx: '#ff3b30', // red
-  'duke-of-edinburgh': '#34c759', // green
+  'duke-of-edinburgh': '#34c759', // green / forest (DoE page uses bronze/silver/gold themes)
   'unicef-ambassador': '#0a84ff', // blue
-  mun: '#64d2ff', // light blue
+  mun: '#64d2ff', // light blue (distinct from Interact)
   'school-show': '#ec4899', // magenta / pink
+  'spark-club': '#F97316', // orange (distinct from Operation Smile yellow)
+  'interact-club': '#d946ef', // fuchsia (distinct from SPARK orange)
+  'eco-committee': '#14b8a6', // teal (distinct from Duke green, fits eco/water theme)
 }
 
 /** Other clubs: distinct hues, no purple (deterministic, no duplicates) */

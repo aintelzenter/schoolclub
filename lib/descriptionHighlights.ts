@@ -10,14 +10,14 @@ const MAX_BULLET_LENGTH = 55
 function trimToWords(s: string, maxWords: number): string {
   const words = s.trim().split(/\s+/).filter(Boolean)
   if (words.length <= maxWords) return words.join(' ')
-  return words.slice(0, maxWords).join(' ') + '…'
+  return words.slice(0, maxWords).join(' ')
 }
 
 function trimToLength(s: string, max: number): string {
   const t = s.trim()
   if (t.length <= max) return t
   const cut = t.slice(0, max + 1).search(/\s+\S*$/)
-  return cut > 0 ? t.slice(0, cut).trim() : t.slice(0, max).trim() + '…'
+  return cut > 0 ? t.slice(0, cut).trim() : t.slice(0, max).trim()
 }
 
 /** 3 short bullets for "What we do" — ~6–10 words each */
@@ -63,21 +63,21 @@ export function getDescriptionHighlights(description: string, tagline?: string):
   return bullets.slice(0, 3)
 }
 
-/** Shorten description for initial view (e.g. first ~220 chars + "…") */
+/** First complete sentence(s) up to maxChars (word boundary, no ellipsis). */
 export function getShortDescription(description: string, maxChars = 220): string {
   const t = description.trim()
   if (t.length <= maxChars) return t
   const cut = t.slice(0, maxChars + 1).search(/\s+\S*$/)
   const end = cut > 0 ? cut : maxChars
-  return t.slice(0, end).trim() + '…'
+  return t.slice(0, end).trim()
 }
 
-/** Max 2 lines summary (~100–120 chars) for hero/short description */
+/** Short summary for display (word boundary, no ellipsis). */
 export function getShortSummaryTwoLines(description: string, maxChars = 120): string {
   const t = description.trim()
   if (!t) return ''
   if (t.length <= maxChars) return t
   const cut = t.slice(0, maxChars + 1).search(/\s+\S*$/)
   const end = cut > 0 ? cut : maxChars
-  return t.slice(0, end).trim() + '…'
+  return t.slice(0, end).trim()
 }

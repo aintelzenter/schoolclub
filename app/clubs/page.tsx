@@ -20,13 +20,11 @@ export default function ClubsPage() {
 
   const filteredClubs = useMemo(() => {
     if (yearGroupFilter === 'all') return allClubs
-    return allClubs.filter(
-      (club) => club.id !== 'blank' && clubMatchesYear(club, yearGroupFilter as number)
-    )
+    return allClubs.filter((club) => clubMatchesYear(club, yearGroupFilter as number))
   }, [allClubs, yearGroupFilter])
 
   return (
-    <div className="relative pt-24 pb-16 min-h-screen">
+    <div className="relative pt-8 pb-16 min-h-screen">
       {/* Ultra-subtle background texture (2–3% opacity) */}
       <div
         className="absolute inset-0 pointer-events-none z-0 opacity-[0.025]"

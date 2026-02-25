@@ -1,4 +1,4 @@
-# ANSXtra - Amnuaysilpa School Extracurricular Portal
+# ANSXtra - Amnuaysilpa School Extracurricular Hub
 
 A extracurricular activities portal for Amnuaysilpa School(Built with Next.js 14, TypeScript, and Tailwind CSS)
 

@@ -3,10 +3,15 @@
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
 import { motion } from 'framer-motion'
+import { useEffect } from 'react'
 
 export default function NotFound() {
+  useEffect(() => {
+    document.title = 'Page not found | ANSXtra'
+  }, [])
+
   return (
-    <div className="pt-24 pb-16 min-h-screen flex items-center">
+    <div className="pt-24 pb-16 min-h-screen flex items-center overflow-x-hidden">
       <Container>
         <motion.div
           initial={{ opacity: 0, y: 20 }}

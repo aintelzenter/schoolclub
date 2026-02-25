@@ -1,8 +1,41 @@
 import clubsData from '@/data/clubs.json'
 import { Club } from './types/club'
 
+const BLANK_PLACEHOLDER_ID = 'blank'
+
+/** Fixed order: Duke, School Show, TEDx, then MUN, Operation Smile, Interact, then rest. */
+const PinnedOrder: string[] = [
+  'duke-of-edinburgh',
+  'school-show',
+  'tedx',
+  'mun',
+  'operation-smile',
+  'interact-club',
+]
+
+/** Deterministic hash for stable "random" order of remaining clubs */
+function hashId(id: string): number {
+  let h = 0
+  for (let i = 0; i < id.length; i++) {
+    h = (h << 5) - h + id.charCodeAt(i)
+    h = h & h
+  }
+  return Math.abs(h)
+}
+
 export function getClubs(): Club[] {
-  return clubsData as Club[]
+  const clubs = (clubsData as Club[]).filter((c) => c.id !== BLANK_PLACEHOLDER_ID)
+  const byId = new Map(clubs.map((c) => [c.id, c]))
+  const pinned: Club[] = []
+  for (const id of PinnedOrder) {
+    const club = byId.get(id)
+    if (club) pinned.push(club)
+  }
+  const pinnedIds = new Set(PinnedOrder)
+  const rest = clubs
+    .filter((c) => !pinnedIds.has(c.id))
+    .sort((a, b) => hashId(a.id) - hashId(b.id))
+  return [...pinned, ...rest]
 }
 
 export function getClubById(id: string): Club | undefined {
@@ -10,7 +43,6 @@ export function getClubById(id: string): Club | undefined {
 }
 
 export function getFeaturedClubs(): Club[] {
-  // Return first 6 clubs as featured
-  return (clubsData as Club[]).slice(0, 6)
+  return getClubs().slice(0, 6)
 }
 

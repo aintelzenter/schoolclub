@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { Container } from '../ui/Container'
 
 export function Footer() {
@@ -10,16 +11,22 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12">
           {/* Brand */}
           <div className="md:col-span-2">
-            <Link href="/" className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-pink to-brand-purple flex items-center justify-center">
-                <span className="text-white font-bold text-lg">A</span>
-              </div>
+            <Link href="/about#logo" className="flex items-center gap-3 mb-4">
+              <span className="relative w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden">
+                <Image
+                  src="/ansxtra-logo.png"
+                  alt="ANSXtra"
+                  width={40}
+                  height={40}
+                  className="object-contain w-full h-full"
+                />
+              </span>
               <span className="text-xl font-bold text-white">
                 ANS<span className="text-brand-pink">Xtra</span>
               </span>
             </Link>
             <p className="text-white/60 text-sm leading-relaxed max-w-md">
-              The official extracurricular activities portal for Amnuaysilpa School.
+              The official extracurricular activities hub for Amnuaysilpa School.
               Discover clubs, join activities, and make the most of your school experience.
             </p>
           </div>
@@ -27,15 +34,25 @@ export function Footer() {
           {/* Quick Links */}
           <div>
             <h4 className="text-white font-semibold mb-4">Quick Links</h4>
-            <ul className="space-y-2">
+            <ul className="space-y-1">
               <li>
-                <Link href="/" className="text-white/60 hover:text-white text-sm transition-colors">
+                <Link href="/" className="block py-2.5 text-white/60 hover:text-white text-sm transition-colors">
                   Home
                 </Link>
               </li>
               <li>
-                <Link href="/clubs" className="text-white/60 hover:text-white text-sm transition-colors">
+                <Link href="/clubs" className="block py-2.5 text-white/60 hover:text-white text-sm transition-colors">
                   Browse Clubs
+                </Link>
+              </li>
+              <li>
+                <Link href="/my-applications" className="block py-2.5 text-white/60 hover:text-white text-sm transition-colors">
+                  My Applications
+                </Link>
+              </li>
+              <li>
+                <Link href="/about" className="block py-2.5 text-white/60 hover:text-white text-sm transition-colors">
+                  About Us
                 </Link>
               </li>
             </ul>

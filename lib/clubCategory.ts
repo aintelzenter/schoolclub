@@ -56,7 +56,7 @@ export function getCategoryLayout(category: ClubCategory): CategoryLayout {
   switch (category) {
     case 'charity':
       return {
-        headerGap: 'gap-8 md:gap-10',
+        headerGap: 'gap-4 md:gap-5',
         titleSize: 'text-2xl md:text-3xl lg:text-4xl',
         sectionHeaderStyle: 'soft',
         cardRounding: 'rounded-2xl',
@@ -68,7 +68,7 @@ export function getCategoryLayout(category: ClubCategory): CategoryLayout {
       }
     case 'academic':
       return {
-        headerGap: 'gap-6 md:gap-8',
+        headerGap: 'gap-4 md:gap-5',
         titleSize: 'text-2xl md:text-3xl lg:text-4xl',
         sectionHeaderStyle: 'crisp',
         cardRounding: 'rounded-xl',
@@ -80,7 +80,7 @@ export function getCategoryLayout(category: ClubCategory): CategoryLayout {
       }
     case 'performing-arts':
       return {
-        headerGap: 'gap-8 md:gap-12',
+        headerGap: 'gap-4 md:gap-6',
         titleSize: 'text-2xl md:text-3xl lg:text-4xl',
         sectionHeaderStyle: 'dynamic',
         cardRounding: 'rounded-2xl',
@@ -92,7 +92,7 @@ export function getCategoryLayout(category: ClubCategory): CategoryLayout {
       }
     case 'leadership':
       return {
-        headerGap: 'gap-6 md:gap-8',
+        headerGap: 'gap-4 md:gap-5',
         titleSize: 'text-2xl md:text-3xl lg:text-4xl font-extrabold',
         sectionHeaderStyle: 'bold',
         cardRounding: 'rounded-xl',
@@ -104,7 +104,7 @@ export function getCategoryLayout(category: ClubCategory): CategoryLayout {
       }
     default:
       return {
-        headerGap: 'gap-6 md:gap-8',
+        headerGap: 'gap-4 md:gap-5',
         titleSize: 'text-2xl md:text-3xl lg:text-4xl',
         sectionHeaderStyle: 'soft',
         cardRounding: 'rounded-2xl',

@@ -2,23 +2,30 @@
 
 import { useMemo, useEffect, useState } from 'react'
 
-// Predefined hero images: clubs, events, and student activities
+// Predefined hero images from /PHOTOS/Shuffle/
 const HERO_IMAGES = [
-  '/clubs/ANSXtra/Shuffle/3.JPG',
-  '/clubs/ANSXtra/Shuffle/4.JPG',
-  '/clubs/ANSXtra/Shuffle/5.JPG',
-  '/clubs/ANSXtra/Shuffle/7.JPG',
-  '/clubs/ANSXtra/Shuffle/8.JPG',
-  '/clubs/ANSXtra/Shuffle/9.JPG',
-  '/clubs/ANSXtra/Shuffle/10.JPG',
-  '/clubs/ANSXtra/Shuffle/11.JPEG',
-  '/clubs/ANSXtra/Shuffle/12.JPG',
-  '/clubs/ANSXtra/Shuffle/14.JPG',
-  '/clubs/ANSXtra/Shuffle/15.JPG',
-  '/clubs/ANSXtra/Shuffle/16.JPG',
-  '/clubs/ANSXtra/Shuffle/18.JPG',
-  '/clubs/ANSXtra/Shuffle/19.JPG',
-  '/clubs/ANSXtra/Shuffle/20.JPG',
+  '/clubs/PHOTOS/Shuffle/1.JPG',
+  '/clubs/PHOTOS/Shuffle/2.JPG',
+  '/clubs/PHOTOS/Shuffle/3.JPG',
+  '/clubs/PHOTOS/Shuffle/4.JPG',
+  '/clubs/PHOTOS/Shuffle/5.JPG',
+  '/clubs/PHOTOS/Shuffle/7.JPG',
+  '/clubs/PHOTOS/Shuffle/9.JPG',
+  '/clubs/PHOTOS/Shuffle/10.JPG',
+  '/clubs/PHOTOS/Shuffle/11.jpeg',
+  '/clubs/PHOTOS/Shuffle/12.JPG',
+  '/clubs/PHOTOS/Shuffle/14.JPG',
+  '/clubs/PHOTOS/Shuffle/15.JPG',
+  '/clubs/PHOTOS/Shuffle/16.JPG',
+  '/clubs/PHOTOS/Shuffle/18.JPG',
+  '/clubs/PHOTOS/Shuffle/19.JPG',
+  '/clubs/PHOTOS/Shuffle/20.JPG',
+  '/clubs/PHOTOS/Shuffle/750_8105.PNG',
+  '/clubs/PHOTOS/Shuffle/IMG_8469.JPG',
+  '/clubs/PHOTOS/Shuffle/IMG_8471.JPG',
+  '/clubs/PHOTOS/Shuffle/IMG_8478.JPG',
+  '/clubs/PHOTOS/Shuffle/PTA_3377.PNG',
+  '/clubs/PHOTOS/Shuffle/PTA_3669.PNG',
 ]
 
 function shuffleArray<T>(array: T[]): T[] {
@@ -38,6 +45,8 @@ export function HeroImageShuffle() {
   const [step, setStep] = useState(0)
 
   useEffect(() => {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (prefersReduced) return // Show static first image only
     const interval = setInterval(() => {
       setStep((s) => s + 1)
     }, INTERVAL_MS)
@@ -57,7 +66,7 @@ export function HeroImageShuffle() {
       {/* Base gradient - ensures dark fallback */}
       <div className="absolute inset-0 bg-gradient-to-br from-brand-deep via-brand-navy to-brand-deep" />
 
-      {/* Slot A - key forces remount for zoom restart */}
+      {/* Slot A */}
       <div
         key={`a-${slotAImageIndex}`}
         className="absolute inset-0 transition-opacity ease-out"
@@ -69,7 +78,7 @@ export function HeroImageShuffle() {
         <img
           src={slotAImage}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover brightness-[0.7] saturate-[0.75] contrast-[1.05] animate-hero-zoom"
+          className="absolute inset-0 w-full h-full object-cover brightness-[0.8] saturate-[0.85] contrast-[1.02] animate-hero-zoom"
           style={{ transformOrigin: 'center center' }}
         />
       </div>
@@ -86,19 +95,18 @@ export function HeroImageShuffle() {
         <img
           src={slotBImage}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover brightness-[0.7] saturate-[0.75] contrast-[1.05] animate-hero-zoom"
+          className="absolute inset-0 w-full h-full object-cover brightness-[0.8] saturate-[0.85] contrast-[1.02] animate-hero-zoom"
           style={{ transformOrigin: 'center center' }}
         />
       </div>
 
-      {/* Dark gradient overlay - text and UI dominant */}
+      {/* Darker overlay for readability and cleaner look */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background: `
-            linear-gradient(180deg, rgba(11, 16, 32, 0.85) 0%, rgba(15, 23, 42, 0.6) 35%, rgba(15, 23, 42, 0.4) 100%),
-            radial-gradient(ellipse 80% 80% at 50% 50%, transparent 40%, rgba(11, 16, 32, 0.4) 100%),
-            radial-gradient(ellipse 100% 100% at 50% 50%, transparent 0%, rgba(0, 0, 0, 0.3) 100%)
+            linear-gradient(180deg, rgba(11, 16, 32, 0.78) 0%, rgba(15, 23, 42, 0.45) 40%, rgba(15, 23, 42, 0.35) 100%),
+            radial-gradient(ellipse 100% 100% at 50% 50%, transparent 0%, rgba(0, 0, 0, 0.25) 100%)
           `,
         }}
       />

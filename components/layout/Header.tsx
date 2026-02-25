@@ -8,20 +8,22 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 const LOGOS = [
-  { src: '/clubs/ANSXtra/Logos/IMG_6913.PNG', alt: '' },
-  { src: '/clubs/ANSXtra/Logos/IMG_6914.PNG', alt: '' },
-  { src: '/clubs/ANSXtra/Logos/IMG_6915.PNG', alt: '' },
-  { src: '/clubs/ANSXtra/Logos/IMG_6916.PNG', alt: '' },
-  { src: '/clubs/ANSXtra/Logos/IMG_6917.PNG', alt: '' },
-  { src: '/clubs/ANSXtra/Logos/IMG_6918.PNG', alt: '' },
-  { src: '/clubs/ANSXtra/Logos/IMG_6919.PNG', alt: '' },
-  { src: '/clubs/ANSXtra/Logos/IMG_6920.PNG', alt: '' },
-  { src: '/clubs/ANSXtra/Logos/IMG_6921.WEBP', alt: '' },
+  { src: '/clubs/PHOTOS/Logos/IMG_3165.PNG', name: 'Club' },
+  { src: '/clubs/PHOTOS/Logos/IMG_3166.PNG', name: 'Club' },
+  { src: '/clubs/PHOTOS/Logos/IMG_3167.PNG', name: 'Club' },
+  { src: '/clubs/PHOTOS/Logos/IMG_3175.PNG', name: 'Club' },
+  { src: '/clubs/PHOTOS/Logos/IMG_3176.PNG', name: 'Club' },
+  { src: '/clubs/PHOTOS/Logos/IMG_3177.PNG', name: 'Club' },
+  { src: '/clubs/PHOTOS/Logos/IMG_3183.PNG', name: 'Club' },
+  { src: '/clubs/PHOTOS/Logos/IMG_3184.PNG', name: 'Club' },
+  { src: '/clubs/PHOTOS/Logos/IMG_3191.PNG', name: 'Club' },
 ]
 
 const navLinks = [
   { href: '/', label: 'Home' },
-  { href: '/clubs', label: 'Clubs' },
+  { href: '/clubs', label: 'Browse Clubs' },
+  { href: '/my-applications', label: 'My Applications' },
+  { href: '/about', label: 'About Us' },
 ]
 
 export function Header() {
@@ -30,12 +32,20 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
+    let raf = 0
     const handleScroll = () => {
-      setScrolled(window.scrollY > 24)
+      if (raf) return
+      raf = requestAnimationFrame(() => {
+        setScrolled(window.scrollY > 24)
+        raf = 0
+      })
     }
     handleScroll()
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      if (raf) cancelAnimationFrame(raf)
+    }
   }, [])
 
   const isHome = pathname === '/'
@@ -44,84 +54,92 @@ export function Header() {
   return (
     <header
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out',
+        'fixed top-0 left-0 right-0 z-[110] transition-[transform,opacity,background-color,border-color] duration-200 ease-out pt-[env(safe-area-inset-top)]',
         headerVisible
           ? 'translate-y-0 opacity-100 pointer-events-auto'
           : '-translate-y-full opacity-0 pointer-events-none',
         headerVisible && 'bg-brand-deep/90 backdrop-blur-xl border-b border-white/10'
       )}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:pl-6 sm:pr-6 lg:pl-8 lg:pr-8">
         <div className="flex items-center justify-between h-16 md:h-20 gap-4">
-          {/* Logos section */}
+          {/* Left: school logo + club marquee */}
           <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
-            <Link href="/" className="relative flex h-9 flex-shrink-0 items-center md:h-11">
+            <Link href="/" className="flex flex-shrink-0 items-center min-w-0">
               <Image
-                src="/clubs/ANSXtra/School%20logo/amnuaysilpa-white%20(1).png"
+                src="/amnuaysilpa-logo.png"
                 alt="Amnuaysilpa School"
-                width={130}
-                height={44}
-                className="h-full w-auto max-h-full object-contain object-left rounded-sm"
+                width={100}
+                height={28}
+                className="h-5 w-auto object-contain object-left opacity-90 sm:h-6"
               />
             </Link>
-            <div className="hidden sm:block h-6 w-px bg-white/15 flex-shrink-0" />
-            <div className="relative min-w-0 flex-1 overflow-hidden py-1">
-              <div className="logo-marquee flex w-max shrink-0 items-center gap-3">
+            <div className="hidden sm:block h-5 w-px bg-white/15 flex-shrink-0" />
+            <div className="relative min-w-0 flex-1 overflow-hidden py-2">
+              <div className="logo-marquee flex w-max shrink-0 items-center gap-5">
                 {[...LOGOS, ...LOGOS].map((logo, i) => (
                   <div
                     key={i}
-                    className="relative h-6 w-7 flex-shrink-0 sm:h-7 sm:w-9 md:h-8 md:w-10 flex items-center justify-center rounded-md bg-white/5 ring-1 ring-white/10 p-1"
+                    className="relative h-11 w-14 flex-shrink-0 sm:h-12 sm:w-16 md:h-14 md:w-20 flex items-center justify-center transition-transform duration-200 hover:scale-105"
+                    title={logo.name}
                   >
                     <Image
                       src={logo.src}
-                      alt=""
-                      width={40}
-                      height={24}
+                      alt={logo.name}
+                      width={72}
+                      height={52}
                       className="max-h-full max-w-full w-auto h-auto object-contain"
                     />
                   </div>
                 ))}
               </div>
             </div>
-            <span className="hidden sm:inline-flex flex-shrink-0 items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 text-sm font-medium text-white/90 ring-1 ring-white/10 whitespace-nowrap">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-pink to-brand-purple font-semibold">9+</span>
-              clubs
-            </span>
           </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-1 flex-shrink-0">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  'px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
-                  'border border-transparent backdrop-blur-md',
-                  pathname === link.href
-                    ? 'text-white bg-white/10 border-white/10'
-                    : 'text-white/75 hover:text-white hover:bg-white/[0.06] hover:border-white/5 hover:-translate-y-0.5'
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
-            <Link
-              href="/clubs"
-              className={cn(
-                'ml-4 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200',
-                'bg-gradient-to-r from-brand-pink to-brand-purple text-white',
-                'hover:shadow-glow-sm hover:-translate-y-0.5'
-              )}
-            >
-              Browse Clubs
-            </Link>
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    'px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-out',
+                    'border backdrop-blur-md',
+                    isActive
+                      ? 'text-white bg-brand-purple/25 border-brand-purple/50 shadow-[0_0_20px_rgba(124,58,237,0.2)]'
+                      : 'text-white/75 border-transparent hover:text-white hover:bg-white/[0.06] hover:border-white/5 hover:-translate-y-0.5'
+                  )}
+                >
+                  {link.label}
+                </Link>
+              )
+            })}
           </nav>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden w-10 h-10 flex items-center justify-center text-white"
+          {/* Top right: ANSXtra logo (desktop) */}
+          <Link href="/about#logo" className="hidden md:flex flex-shrink-0 items-center justify-center rounded-lg transition-opacity hover:opacity-90" aria-label="About the logo">
+            <span className="relative flex h-12 w-12">
+              <Image
+                src="/ansxtra-logo.png"
+                alt=""
+                width={48}
+                height={48}
+                className="object-contain"
+                style={{ width: '100%', height: '100%' }}
+              />
+            </span>
+          </Link>
+
+          {/* Mobile: right logo + menu button (44px min touch targets) */}
+          <div className="flex md:hidden items-center gap-1 flex-shrink-0">
+            <Link href="/about#logo" className="flex min-h-[44px] min-w-[44px] h-11 w-11 items-center justify-center rounded-lg transition-opacity hover:opacity-90" aria-label="About the logo">
+              <Image src="/ansxtra-logo.png" alt="" width={40} height={40} className="object-contain h-10 w-10" />
+            </Link>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="min-h-[44px] min-w-[44px] w-11 h-11 flex items-center justify-center text-white"
             aria-label="Toggle menu"
           >
             <svg
@@ -146,7 +164,8 @@ export function Header() {
                 />
               )}
             </svg>
-          </button>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -159,31 +178,24 @@ export function Header() {
           className="md:hidden bg-brand-deep/95 backdrop-blur-xl border-b border-white/10"
         >
           <nav className="px-4 py-4 space-y-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className={cn(
-                  'block px-4 py-3 rounded-xl text-base font-medium transition-all duration-200',
-                  pathname === link.href
-                    ? 'text-white bg-white/10'
-                    : 'text-white/75 hover:text-white hover:bg-white/[0.06]'
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
-            <Link
-              href="/clubs"
-              onClick={() => setMobileMenuOpen(false)}
-              className={cn(
-                'block text-center mt-4 px-5 py-3 rounded-xl text-base font-semibold',
-                'bg-gradient-to-r from-brand-pink to-brand-purple text-white transition-all duration-200'
-              )}
-            >
-              Browse Clubs
-            </Link>
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={cn(
+                    'block px-4 py-3 rounded-xl text-base font-medium transition-all duration-300 ease-out',
+                    isActive
+                      ? 'text-white bg-brand-purple/25 border border-brand-purple/40'
+                      : 'text-white/75 hover:text-white hover:bg-white/[0.06]'
+                  )}
+                >
+                  {link.label}
+                </Link>
+              )
+            })}
           </nav>
         </motion.div>
       )}

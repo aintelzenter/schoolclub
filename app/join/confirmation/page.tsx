@@ -11,11 +11,10 @@ function ConfirmationContent() {
   const searchParams = useSearchParams()
   const clubName = searchParams.get('club') || 'the club'
   const studentId = searchParams.get('studentId') || ''
-  const role = searchParams.get('role')
 
   return (
-    <div className="pt-24 pb-16 min-h-screen">
-      <Container size="narrow">
+    <div className="pt-24 pb-16 min-h-screen overflow-x-hidden">
+      <Container size="narrow" className="min-w-0 max-w-full">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -39,7 +38,7 @@ function ConfirmationContent() {
             transition={{ delay: 0.3 }}
             className="text-3xl md:text-4xl font-bold text-white mb-4"
           >
-            You're In!
+            Application submitted
           </motion.h1>
 
           <motion.p
@@ -48,7 +47,7 @@ function ConfirmationContent() {
             transition={{ delay: 0.4 }}
             className="text-lg text-white/70 mb-8"
           >
-            Your registration for <span className="text-white font-semibold">{clubName}</span> has been submitted successfully.
+            Your application for <span className="text-white font-semibold">{clubName}</span> has been submitted successfully.
           </motion.p>
 
           {/* Summary card */}
@@ -58,7 +57,7 @@ function ConfirmationContent() {
             transition={{ delay: 0.5 }}
           >
             <Card padding="lg" className="text-left mb-8">
-              <h2 className="text-lg font-bold text-white mb-4">Registration Summary</h2>
+              <h2 className="text-lg font-bold text-white mb-4">Application Summary</h2>
               
               <div className="space-y-4">
                 <div className="flex justify-between items-center py-3 border-b border-white/10">
@@ -71,17 +70,10 @@ function ConfirmationContent() {
                   <span className="text-white font-medium">{studentId}</span>
                 </div>
                 
-                {role && (
-                  <div className="flex justify-between items-center py-3 border-b border-white/10">
-                    <span className="text-white/60">Selected Role</span>
-                    <span className="text-white font-medium">{role}</span>
-                  </div>
-                )}
-                
                 <div className="flex justify-between items-center py-3">
                   <span className="text-white/60">Status</span>
                   <span className="inline-flex items-center px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-medium">
-                    Registered
+                    Submitted
                   </span>
                 </div>
               </div>
@@ -104,8 +96,7 @@ function ConfirmationContent() {
                 <div>
                   <h3 className="text-white font-semibold mb-1">What's Next?</h3>
                   <p className="text-white/70 text-sm">
-                    The club leaders will contact you with meeting details and any additional information. 
-                    Make sure to attend the next meeting to get started!
+                    Club leaders will review applications and contact you with next steps or meeting details.
                   </p>
                 </div>
               </div>

@@ -2,6 +2,8 @@ export interface ClubLeader {
   name: string
   year: string | null
   email: string
+  /** Student ID for contact display (e.g. "79876") */
+  student_id?: string
 }
 
 export interface ClubTeacher {
@@ -21,6 +23,10 @@ export interface ClubQuestion {
 export interface Club {
   id: string
   name: string
+  /** Display name for hero/title when different from name (e.g. "Model United Nations" for MUN). */
+  displayName?: string
+  /** Short 1–2 sentence summary for cards (no "X is a..."). If missing, generated from description. */
+  summary?: string
   tagline: string
   description: string
   meetingDay: string
@@ -31,6 +37,8 @@ export interface Club {
   yearGroupMin?: number
   /** Max year (7–13) for filtering */
   yearGroupMax?: number
+  /** Folder name inside /public/clubs/PHOTOS/ that holds this club's photos */
+  photoFolder?: string
   leaders: ClubLeader[]
   teachers: ClubTeacher[]
   contact: string
