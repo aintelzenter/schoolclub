@@ -21,7 +21,7 @@ const PARTS = [
     id: 'four',
     symbol: '4',
     label: 'Beyond the 4.0',
-    text: "There's more than getting a GPA of 4. Life isn't measured only by the transcript—passion, growth, and connection happen outside the report card.",
+    text: "There's more than getting a GPA of 4. Life isn't measured only by the transcript—passion, growth, and connection can happen outside academics.",
   },
 ] as const
 
@@ -34,7 +34,6 @@ export function LogoMeaning() {
         The logo
       </p>
       <div className="flex flex-col items-center">
-        {/* Logo image + interactive A / + / 4 */}
         <div className="relative flex flex-col items-center gap-6">
           <div className="relative">
             <Image
@@ -78,7 +77,6 @@ export function LogoMeaning() {
                     }
                   `}
                 >
-                  {/* Glow behind symbol when selected */}
                   <motion.span
                     className="absolute inset-0 rounded-xl"
                     initial={false}
@@ -109,7 +107,6 @@ export function LogoMeaning() {
           </div>
         </div>
 
-        {/* Meaning text */}
         <div className="mt-4 min-h-[4.5rem] w-full max-w-md text-center">
           <AnimatePresence mode="wait">
             {active ? (

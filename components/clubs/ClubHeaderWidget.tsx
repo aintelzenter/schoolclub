@@ -13,7 +13,6 @@ interface ClubHeaderWidgetProps {
 const CARD_BASE = 'rounded-xl border overflow-hidden'
 const CARD_PADDING = 'p-4 md:p-5'
 
-/** Club-specific header widget: unique content, interactive, visually appealing. Not a description repeat. */
 export function ClubHeaderWidget({ clubId, tintHex, className }: ClubHeaderWidgetProps) {
   switch (clubId) {
     case 'operation-smile':

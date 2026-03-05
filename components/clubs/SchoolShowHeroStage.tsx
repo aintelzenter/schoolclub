@@ -6,13 +6,11 @@ import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 
 export interface SchoolShowHeroStageProps {
-  /** Main stage image (School Show hero photo) */
   imageSrc: string
   production: SchoolShowProduction
   className?: string
 }
 
-/** Theme-based color overlay for the stage image (teal / gold / rose / icy blue). */
 const THEME_OVERLAYS: Record<SchoolShowProduction, string> = {
   mermaid: 'linear-gradient(180deg, rgba(13,148,136,0.22) 0%, rgba(13,148,136,0.1) 50%, transparent 100%)',
   aladdin: 'linear-gradient(180deg, rgba(201,162,39,0.24) 0%, rgba(201,162,39,0.08) 50%, transparent 100%)',
@@ -20,9 +18,6 @@ const THEME_OVERLAYS: Record<SchoolShowProduction, string> = {
   frozen: 'linear-gradient(180deg, rgba(56,189,248,0.22) 0%, rgba(56,189,248,0.1) 50%, transparent 100%)',
 }
 
-/**
- * Right-side stage frame: photo with theme overlay. Castle for Beauty is in hero background, not here.
- */
 export function SchoolShowHeroStage({
   imageSrc,
   production,
@@ -34,16 +29,27 @@ export function SchoolShowHeroStage({
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
+    let rafId = 0
     const onScroll = () => {
-      const rect = el.getBoundingClientRect()
-      const center = rect.top + rect.height / 2
-      const viewportCenter = typeof window !== 'undefined' ? window.innerHeight / 2 : 400
-      const delta = (viewportCenter - center) * 0.03
-      setParallaxY(Math.max(-12, Math.min(12, delta)))
+      if (rafId) return
+      rafId = requestAnimationFrame(() => {
+        rafId = 0
+        const rect = el.getBoundingClientRect()
+        const center = rect.top + rect.height / 2
+        const viewportCenter = typeof window !== 'undefined' ? window.innerHeight / 2 : 400
+        const delta = (viewportCenter - center) * 0.03
+        setParallaxY((prev) => {
+          const next = Math.max(-12, Math.min(12, delta))
+          return prev === next ? prev : next
+        })
+      })
     }
     window.addEventListener('scroll', onScroll, { passive: true })
     onScroll()
-    return () => window.removeEventListener('scroll', onScroll)
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      if (rafId) cancelAnimationFrame(rafId)
+    }
   }, [])
 
   return (

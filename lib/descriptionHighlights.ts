@@ -1,9 +1,3 @@
-/**
- * Derive short bullet highlights from club description/tagline.
- * getWhatWeDoBullets: 3 bullets, ~6–10 words each (scannable).
- * getDescriptionHighlights: longer bullets for "What you'll do" fallback.
- */
-
 const MAX_WORDS_PER_BULLET = 10
 const MAX_BULLET_LENGTH = 55
 
@@ -20,7 +14,6 @@ function trimToLength(s: string, max: number): string {
   return cut > 0 ? t.slice(0, cut).trim() : t.slice(0, max).trim()
 }
 
-/** 3 short bullets for "What we do" — ~6–10 words each */
 export function getWhatWeDoBullets(description: string, tagline?: string): string[] {
   const text = (description || '').trim()
   if (!text) return []
@@ -63,7 +56,6 @@ export function getDescriptionHighlights(description: string, tagline?: string):
   return bullets.slice(0, 3)
 }
 
-/** First complete sentence(s) up to maxChars (word boundary, no ellipsis). */
 export function getShortDescription(description: string, maxChars = 220): string {
   const t = description.trim()
   if (t.length <= maxChars) return t
@@ -72,7 +64,6 @@ export function getShortDescription(description: string, maxChars = 220): string
   return t.slice(0, end).trim()
 }
 
-/** Short summary for display (word boundary, no ellipsis). */
 export function getShortSummaryTwoLines(description: string, maxChars = 120): string {
   const t = description.trim()
   if (!t) return ''

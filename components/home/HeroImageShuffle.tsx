@@ -66,10 +66,8 @@ export function HeroImageShuffle() {
 
   return (
     <div className="absolute inset-0 overflow-hidden" aria-hidden>
-      {/* Base gradient - ensures dark fallback */}
       <div className="absolute inset-0 bg-gradient-to-br from-brand-deep via-brand-navy to-brand-deep" />
 
-      {/* Slot A */}
       <div
         key={`a-${slotAImageIndex}`}
         className="absolute inset-0 transition-opacity ease-out"
@@ -86,7 +84,6 @@ export function HeroImageShuffle() {
         />
       </div>
 
-      {/* Slot B */}
       <div
         key={`b-${slotBImageIndex}`}
         className="absolute inset-0 transition-opacity ease-out"
@@ -103,7 +100,6 @@ export function HeroImageShuffle() {
         />
       </div>
 
-      {/* Darker overlay for readability and cleaner look */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{

@@ -45,6 +45,7 @@ interface DukeJourneyMapProps {
   theme: DoeThemePalette
   reducedMotion: boolean
   className?: string
+  onSheetOpenChange?: (open: boolean) => void
 }
 
 const ICON_SVG: Record<JourneyCheckpoint['icon'], React.ReactNode> = {
@@ -76,12 +77,11 @@ function CheckpointIcon({ icon }: { icon: JourneyCheckpoint['icon'] }) {
   )
 }
 
-export function DukeJourneyMap({ level, theme, reducedMotion, className }: DukeJourneyMapProps) {
+export function DukeJourneyMap({ level, theme, reducedMotion, className, onSheetOpenChange }: DukeJourneyMapProps) {
   const checkpoints = DOE_JOURNEY[level]
   const [activeId, setActiveId] = useState<string | null>(checkpoints[0]?.id ?? null)
   const active = checkpoints.find((c) => c.id === activeId) ?? checkpoints[0]
 
-  // Keep activeId valid when level changes
   useEffect(() => {
     const ids = new Set(checkpoints.map((c) => c.id))
     if (activeId === null || !ids.has(activeId)) {
@@ -90,6 +90,11 @@ export function DukeJourneyMap({ level, theme, reducedMotion, className }: DukeJ
   }, [level, checkpoints, activeId])
 
   const [sheetOpen, setSheetOpen] = useState(false)
+
+  useEffect(() => {
+    onSheetOpenChange?.(sheetOpen)
+  }, [sheetOpen, onSheetOpenChange])
+
   const openPanel = useCallback((id: string) => {
     setActiveId(id)
     setSheetOpen(true)
@@ -106,7 +111,6 @@ export function DukeJourneyMap({ level, theme, reducedMotion, className }: DukeJ
         Journey Map
       </h2>
 
-      {/* Mobile: bottom sheet — tap checkpoint to open, scrollable content fits screen */}
       <AnimatePresence>
         {sheetOpen && active && (
           <>
@@ -152,7 +156,6 @@ export function DukeJourneyMap({ level, theme, reducedMotion, className }: DukeJ
         )}
       </AnimatePresence>
 
-      {/* Trail: horizontal on md+, vertical on small */}
       <div className="flex flex-col md:flex-row md:items-center gap-0 md:gap-0">
         {checkpoints.map((cp, i) => {
           const isActive = activeId === cp.id
@@ -218,7 +221,6 @@ export function DukeJourneyMap({ level, theme, reducedMotion, className }: DukeJ
         })}
       </div>
 
-      {/* Panel — desktop only (mobile uses bottom sheet) */}
       <div className="hidden md:block">
       <AnimatePresence mode="wait">
         {active && (

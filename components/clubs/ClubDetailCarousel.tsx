@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils/cn'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-/** Manual image carousel: compact 16:9 card, thumbnails below, glass border, no autoplay. */
 export interface ClubDetailCarouselProps {
   images: string[]
   alt?: string
@@ -69,7 +68,6 @@ export function ClubDetailCarousel({
       onPointerUp={handlePointerUp}
       onPointerLeave={() => setSwipeStart(null)}
     >
-      {/* Main image: fixed 16:9, compact */}
       <div className="relative w-full aspect-video">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
@@ -99,7 +97,6 @@ export function ClubDetailCarousel({
           </motion.div>
         </AnimatePresence>
 
-        {/* Arrows overlay */}
         <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-2 pointer-events-none sm:pointer-events-auto">
           <button
             type="button"
@@ -126,7 +123,6 @@ export function ClubDetailCarousel({
         </div>
       </div>
 
-      {/* Thumbnail strip */}
       {list.length > 1 && (
         <div className="flex gap-2 p-3 border-t border-white/10 bg-black/20 overflow-x-auto scrollbar-hide">
           {list.map((src, i) => (

@@ -2,7 +2,8 @@
 
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
-import { clearApplications, getApplicationsByStudentId } from '@/lib/applications'
+import { fetchStudentApplications } from '@/lib/api'
+import { getApplicationsByStudentId } from '@/lib/applications'
 import type { ClubApplicationPayload } from '@/lib/applications'
 import { cn } from '@/lib/utils/cn'
 import { AlertCircle, ArrowRight, Check, Loader2, X } from 'lucide-react'
@@ -11,6 +12,15 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 
 const HEADER_OFFSET = 'calc(var(--header-height, 5rem) + 0.5rem)'
+
+const CLUB_DISPLAY_NAMES: Partial<Record<string, string>> = {
+  mun: 'Model United Nations',
+  'duke-of-edinburgh': 'Duke of Edinburgh International Award',
+}
+
+function getClubDisplayName(clubId: string, storedName: string): string {
+  return CLUB_DISPLAY_NAMES[clubId] ?? storedName
+}
 
 type ScanState = 'idle' | 'armed' | 'scanning'
 
@@ -30,47 +40,98 @@ function usePrefersReducedMotion() {
 
 const slideY = 8
 
-/** Sort applications newest first */
 function sortByNewest(apps: ClubApplicationPayload[]): ClubApplicationPayload[] {
   return [...apps].sort(
     (a, b) => new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime()
   )
 }
 
+const DEDUPE_WINDOW_MS = 60_000
+
+function dedupeByClub(apps: ClubApplicationPayload[]): ClubApplicationPayload[] {
+  const sorted = sortByNewest(apps)
+  const out: ClubApplicationPayload[] = []
+  for (const a of sorted) {
+    try {
+      const t = new Date(a.submitted_at).getTime()
+      const recent = out.find(
+        (b) => b.club_id === a.club_id && Math.abs(new Date(b.submitted_at).getTime() - t) <= DEDUPE_WINDOW_MS
+      )
+      if (!recent) out.push(a)
+    } catch {
+      out.push(a)
+    }
+  }
+  return sortByNewest(out)
+}
+
+function mergeApplications(
+  fromApi: ClubApplicationPayload[],
+  fromLocal: ClubApplicationPayload[]
+): ClubApplicationPayload[] {
+  const apiDeduped = dedupeByClub(fromApi)
+  const apiTimesByClub = new Map<string, number>()
+  for (const a of apiDeduped) {
+    try {
+      const t = new Date(a.submitted_at).getTime()
+      const existing = apiTimesByClub.get(a.club_id)
+      if (existing === undefined || t > existing) apiTimesByClub.set(a.club_id, t)
+    } catch {
+      apiTimesByClub.set(a.club_id, 0)
+    }
+  }
+  const localOnly = fromLocal.filter((a) => {
+    const apiTime = apiTimesByClub.get(a.club_id)
+    if (apiTime === undefined) return true
+    try {
+      const localTime = new Date(a.submitted_at).getTime()
+      return Math.abs(localTime - apiTime) > DEDUPE_WINDOW_MS
+    } catch {
+      return true
+    }
+  })
+  return sortByNewest([...apiDeduped, ...localOnly])
+}
+
 export default function MyApplicationsPage() {
   const [studentId, setStudentId] = useState('')
   const [submittedId, setSubmittedId] = useState<string | null>(null)
+  const [applicationsList, setApplicationsList] = useState<ClubApplicationPayload[]>([])
+  const [fetchSource, setFetchSource] = useState<'api' | 'local' | null>(null)
   const [scanState, setScanState] = useState<ScanState>('idle')
   const [isLoading, setIsLoading] = useState(false)
   const checkTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const reducedMotion = usePrefersReducedMotion()
 
-  const rawApps = submittedId ? getApplicationsByStudentId(submittedId) : []
-  const applications = sortByNewest(rawApps)
+  const applications = applicationsList
   const hasSearched = submittedId !== null
   const isValidId = /^\d{5}$/.test(studentId)
   const hasTyped = studentId.length > 0
   const isInvalid = hasTyped && !isValidId
 
-  const handleResetStored = useCallback(() => {
-    clearApplications()
-    setSubmittedId(null)
-    setStudentId('')
-  }, [])
-
-  const handleCheck = useCallback(() => {
+  const handleCheck = useCallback(async () => {
     const digits = studentId.replace(/\D/g, '').slice(0, 5)
     setStudentId(digits)
     if (digits.length !== 5) return
     setScanState('scanning')
     setIsLoading(true)
+    setSubmittedId(digits)
     if (checkTimeoutRef.current) clearTimeout(checkTimeoutRef.current)
-    checkTimeoutRef.current = setTimeout(() => {
-      setSubmittedId(digits)
+    checkTimeoutRef.current = null
+
+    const localApps = getApplicationsByStudentId(digits)
+    try {
+      const fromApi = await fetchStudentApplications(digits)
+      const merged = mergeApplications(fromApi, localApps)
+      setApplicationsList(merged)
+      setFetchSource('api')
+    } catch {
+      setApplicationsList(sortByNewest(localApps))
+      setFetchSource('local')
+    } finally {
       setScanState('idle')
       setIsLoading(false)
-      checkTimeoutRef.current = null
-    }, 800 + Math.random() * 400)
+    }
   }, [studentId])
 
   const handleIdChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -113,13 +174,6 @@ export default function MyApplicationsPage() {
             <p className="mt-0.5 text-white/50 text-xs">
               Enter your 5-digit student ID to view submitted applications
             </p>
-            <button
-              type="button"
-              onClick={handleResetStored}
-              className="mt-2 text-xs text-white/40 hover:text-white/70 underline transition-colors"
-            >
-              Reset stored applications (for testing)
-            </button>
           </header>
 
           {/* B) Compact search bar row */}
@@ -202,6 +256,7 @@ export default function MyApplicationsPage() {
               applications={applications}
               submittedId={submittedId}
               isLoading={isLoading}
+              fetchSource={fetchSource}
               reducedMotion={reducedMotion}
             />
           </div>
@@ -294,7 +349,6 @@ function RadarScan({
           <div className="absolute w-full h-px bg-white rotate-45" />
           <div className="absolute w-full h-px bg-white -rotate-45" />
         </div>
-        {/* Sweep beam + glow dot (same rotation) */}
         <div
           className={cn(
             'absolute inset-0 rounded-full',
@@ -334,12 +388,14 @@ function ResultsSection({
   applications,
   submittedId,
   isLoading,
+  fetchSource,
   reducedMotion,
 }: {
   hasSearched: boolean
   applications: ClubApplicationPayload[]
   submittedId: string | null
   isLoading: boolean
+  fetchSource: 'api' | 'local' | null
   reducedMotion: boolean
 }) {
   const [selectedApp, setSelectedApp] = useState<ClubApplicationPayload | null>(null)
@@ -371,7 +427,7 @@ function ResultsSection({
       >
         <div className="flex items-center gap-2 text-white/60 text-sm">
           <Loader2 className="h-4 w-4 animate-spin flex-shrink-0" aria-hidden />
-          <span>Scanning applications…</span>
+          <span>Loading applications…</span>
         </div>
       </motion.div>
     )
@@ -405,6 +461,11 @@ function ResultsSection({
       <p className="text-xs font-medium uppercase tracking-wider text-white/50 mb-3">
         {applications.length} application{applications.length !== 1 ? 's' : ''} found
       </p>
+      {fetchSource === 'local' && (
+        <p className="text-xs text-amber-400/90 mb-3">
+          Showing applications from this device only. Applications submitted on other devices will appear when the server is available.
+        </p>
+      )}
       <div className="grid gap-2">
         {applications.map((app, i) => (
           <ApplicationCard
@@ -460,7 +521,7 @@ function ApplicationCard({
         className="w-full flex items-center gap-3 rounded-lg border border-white/10 bg-brand-navy/40 px-4 py-3 text-left transition-colors hover:border-white/20 hover:bg-brand-navy/50 group"
       >
         <span className="flex-1 min-w-0 font-medium text-white text-sm truncate">
-          {app.club_name}
+          {getClubDisplayName(app.club_id, app.club_name)}
         </span>
         <span className="text-xs text-white/45 flex-shrink-0">
           {formatSubmittedAt(app.submitted_at)}
@@ -524,7 +585,7 @@ function ApplicationDetailDialog({
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
               <h2 id="application-dialog-title" className="text-lg font-bold text-white pr-4 truncate">
-                {app.club_name}
+                {getClubDisplayName(app.club_id, app.club_name)}
               </h2>
               <button
                 ref={closeRef}

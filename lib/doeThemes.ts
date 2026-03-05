@@ -1,7 +1,3 @@
-/**
- * Duke of Edinburgh club page: award level themes and journey map content.
- * Used only on the Duke of Edinburgh club detail page.
- */
 
 export type DoeAwardLevel = 'bronze' | 'silver' | 'gold'
 
@@ -14,11 +10,9 @@ export interface DoeThemePalette {
   bgTint: string
   border: string
   shadow: string
-  /** RGB for gradient use, e.g. "184,115,51" */
   accentRgb: string
 }
 
-/** Theme palettes: Bronze (warm), Silver (cool), Gold (elegant). Accessible contrast. */
 export const DOE_THEMES: Record<DoeAwardLevel, DoeThemePalette> = {
   bronze: {
     accent: '#b87333',
@@ -52,19 +46,15 @@ export const DOE_THEMES: Record<DoeAwardLevel, DoeThemePalette> = {
 export interface JourneyCheckpoint {
   id: string
   label: string
-  /** Short subtitle for the trail */
   subtitle?: string
-  /** Panel content: commitment level, expectations, components */
   content: {
     commitment?: string
     expectations: string
     components: string[]
   }
-  /** Icon name for the component (volunteering, physical, skills, expedition, residential) */
   icon: 'volunteering' | 'physical' | 'skills' | 'expedition' | 'residential' | 'overview'
 }
 
-/** Journey checkpoints per level. Bronze 3, Silver 4, Gold 5. */
 export const DOE_JOURNEY: Record<DoeAwardLevel, JourneyCheckpoint[]> = {
   bronze: [
     {
@@ -73,7 +63,7 @@ export const DOE_JOURNEY: Record<DoeAwardLevel, JourneyCheckpoint[]> = {
       subtitle: 'Your DofE journey',
       icon: 'overview',
       content: {
-        commitment: 'Minimum 6 months. Adventurous Journey: 2 days / 1 night.',
+        commitment: 'Minimum 6 months. Adventurous Journey: 5 days / 4 nights.',
         expectations: 'Build habits across four areas: Skills, Physical Recreation, Voluntary Service, and Adventurous Journey. Ideal for first-time participants.',
         components: ['Skills', 'Physical', 'Volunteering', 'Expedition'],
       },
@@ -94,7 +84,7 @@ export const DOE_JOURNEY: Record<DoeAwardLevel, JourneyCheckpoint[]> = {
       subtitle: 'Adventurous Journey',
       icon: 'expedition',
       content: {
-        expectations: 'Plan, train for, and complete an expedition with your team. Adventurous Journey: 2 days / 1 night. Builds teamwork, navigation, and resilience.',
+        expectations: 'Plan, train for, and complete an expedition with your team. Adventurous Journey: 5 days / 4 nights. Builds teamwork, navigation, and resilience.',
         components: ['Expedition'],
       },
     },
@@ -106,7 +96,7 @@ export const DOE_JOURNEY: Record<DoeAwardLevel, JourneyCheckpoint[]> = {
       subtitle: 'Stepping up',
       icon: 'overview',
       content: {
-        commitment: 'Minimum 12 months (or 6 months if Bronze completed). Adventurous Journey: 3 days / 2 nights.',
+        commitment: 'Minimum 12 months (or 6 months if Bronze completed). Adventurous Journey: 6 days / 7 nights.',
         expectations: 'Deeper involvement across all sections and a longer, more challenging expedition. Progression from Bronze or direct entry (see direct entry rules).',
         components: ['Skills', 'Physical', 'Volunteering', 'Expedition'],
       },
@@ -137,7 +127,7 @@ export const DOE_JOURNEY: Record<DoeAwardLevel, JourneyCheckpoint[]> = {
       subtitle: 'Adventurous Journey',
       icon: 'expedition',
       content: {
-        expectations: 'A more demanding expedition: 3 days / 2 nights. Stronger focus on team planning, leadership, and self-reliance.',
+        expectations: 'A more demanding expedition: 6 days / 7 nights. Stronger focus on team planning, leadership, and self-reliance.',
         components: ['Expedition'],
       },
     },
@@ -149,7 +139,7 @@ export const DOE_JOURNEY: Record<DoeAwardLevel, JourneyCheckpoint[]> = {
       subtitle: 'Highest level',
       icon: 'overview',
       content: {
-        commitment: 'Minimum 18 months (or 12 months if Silver completed). Adventurous Journey: 4 days / 3 nights. Residential: 5 days / 4 nights.',
+        commitment: 'Minimum 18 months (or 12 months if Silver completed). Adventurous Journey: 7 days / 6 nights. Residential: 5 days / 4 nights.',
         expectations: 'Long-term engagement across all sections plus a Residential project. The full Award experience.',
         components: ['Skills', 'Physical', 'Volunteering', 'Expedition', 'Residential'],
       },
@@ -180,7 +170,7 @@ export const DOE_JOURNEY: Record<DoeAwardLevel, JourneyCheckpoint[]> = {
       subtitle: 'Service and journey',
       icon: 'volunteering',
       content: {
-        expectations: 'Sustained volunteering and a demanding expedition (4 days / 3 nights). Teamwork, planning, and resilience at the highest level.',
+        expectations: 'Sustained volunteering and a demanding expedition (7 days / 6 nights). Teamwork, planning, and resilience at the highest level.',
         components: ['Volunteering', 'Expedition'],
       },
     },
@@ -204,14 +194,12 @@ export const DOE_LEVEL_LABELS: Record<DoeAwardLevel, string> = {
   gold: 'Gold',
 }
 
-/** International Award minimum ages. Early entry (e.g. 13y9m for Bronze) is subject to centre approval. */
 export const DOE_LEVEL_AGES: Record<DoeAwardLevel, { min: number; earlyNote?: string }> = {
   bronze: { min: 14, earlyNote: 'Earlier entry subject to centre approval.' },
   silver: { min: 15, earlyNote: 'Earlier entry subject to centre approval.' },
   gold: { min: 16, earlyNote: 'Earlier entry subject to centre approval.' },
 }
 
-/** Duration and Adventurous Journey / Residential (International Award standards). */
 export interface DoeLevelRequirements {
   duration: string
   adventurousJourney: string
@@ -221,20 +209,19 @@ export interface DoeLevelRequirements {
 export const DOE_LEVEL_REQUIREMENTS: Record<DoeAwardLevel, DoeLevelRequirements> = {
   bronze: {
     duration: 'Minimum 6 months',
-    adventurousJourney: '2 days / 1 night',
+    adventurousJourney: '5 days / 4 nights',
   },
   silver: {
     duration: 'Minimum 12 months (or 6 months if Bronze completed)',
-    adventurousJourney: '3 days / 2 nights',
+    adventurousJourney: '6 days / 7 nights',
   },
   gold: {
     duration: 'Minimum 18 months (or 12 months if Silver completed)',
-    adventurousJourney: '4 days / 3 nights',
+    adventurousJourney: '7 days / 6 nights',
     residential: '5 days / 4 nights',
   },
 }
 
-/** Direct entry: from official ANS DoFE site and International Award. */
 export const DOE_DIRECT_ENTRY_NOTE =
   'If entering Silver or Gold directly without completing the previous level, participants must complete an additional 6 months in either the Service section or the longer of the Physical/Skills sections.'
 

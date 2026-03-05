@@ -47,26 +47,26 @@ function TeamRow({
       whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-20px' }}
       transition={{ ...transition, delay: reduceMotion ? 0 : index * 0.06 }}
-      className="flex flex-col items-center text-center group py-2 px-3 rounded-lg transition-colors duration-200 hover:bg-white/[0.03]"
+      className="flex flex-col items-center text-center group py-3 px-4 rounded-xl transition-colors duration-200 hover:bg-white/[0.03]"
     >
-      <div className="relative w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-full overflow-hidden ring-1 ring-white/20 ring-offset-2 ring-offset-[var(--brand-deep)] group-hover:ring-brand-pink/50 transition-colors duration-200 shrink-0">
+      <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full overflow-hidden ring-2 ring-white/20 ring-offset-2 ring-offset-[var(--brand-deep)] group-hover:ring-brand-pink/50 transition-colors duration-200 shrink-0">
         {!imgError ? (
-          <Image src={member.photo} alt={member.name} fill className="object-cover object-top" sizes="72px" onError={() => setImgError(true)} />
+          <Image src={member.photo} alt={member.name} fill className="object-cover object-top" sizes="(max-width: 640px) 80px, (max-width: 768px) 96px, 112px" onError={() => setImgError(true)} />
         ) : (
           <div className="absolute inset-0 bg-white/10 flex items-center justify-center text-white/40 text-xs">Photo</div>
         )}
       </div>
-      <div className="mt-2 flex flex-wrap items-center justify-center gap-x-1.5 gap-y-0.5">
-        <span className="font-semibold text-white text-sm group-hover:underline underline-offset-2 decoration-brand-pink/60 transition-all duration-200">{member.name}</span>
-        <span className="text-[10px] font-medium uppercase tracking-wider text-white/40 shrink-0">Y12</span>
+      <div className="mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5">
+        <span className="font-semibold text-white text-base sm:text-lg group-hover:underline underline-offset-2 decoration-brand-pink/60 transition-all duration-200">{member.name}</span>
+        <span className="text-[10px] sm:text-xs font-medium uppercase tracking-wider text-white/40 shrink-0">Y12</span>
         <span className="text-white/50 text-xs shrink-0">·</span>
-        <span className="text-white/60 text-xs">{member.role}</span>
+        <span className="text-white/60 text-sm">{member.role}</span>
       </div>
       <a
         href={`mailto:${member.email}`}
-        className="mt-1 text-xs text-white/50 hover:text-brand-pink hover:underline underline-offset-2 transition-colors duration-200 inline-flex items-center gap-1.5 opacity-70 group-hover:opacity-100"
+        className="mt-1.5 text-xs sm:text-sm text-white/50 hover:text-brand-pink hover:underline underline-offset-2 transition-colors duration-200 inline-flex items-center gap-1.5 opacity-70 group-hover:opacity-100"
       >
-        <svg className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
         {member.email}
@@ -215,14 +215,14 @@ export default function AboutPage() {
         </section>
 
         {/* Core Team */}
-        <section className="py-6 border-b border-white/10 scroll-mt-header text-center">
-          <p className="about-section-heading text-xs font-medium uppercase tracking-widest mb-4">Core Team</p>
+        <section className="py-10 md:py-12 border-b border-white/10 scroll-mt-header text-center">
+          <p className="about-section-heading text-xs font-medium uppercase tracking-widest mb-6">Core Team</p>
           <motion.div
             initial={initialUp(reduceMotion)}
             whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={transition}
-            className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8 md:gap-10"
+            className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-10 md:gap-14"
           >
             {TEAM.map((member, i) => (
               <TeamRow key={member.id} member={member} index={i} reduceMotion={reduceMotion} transition={transition} />

@@ -7,11 +7,9 @@ import { Container } from '../ui/Container'
 export function CTABanner() {
   return (
     <section className="py-16 md:py-24 relative overflow-hidden">
-      {/* Animated gradient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-brand-deep via-brand-navy to-brand-deep" />
-      
-      {/* Animated decorative blurs */}
-      <motion.div 
+
+      <motion.div
         animate={{ 
           scale: [1, 1.2, 1],
           opacity: [0.3, 0.5, 0.3],
@@ -76,7 +74,6 @@ export function CTABanner() {
             </Button>
           </div>
 
-          {/* Trust indicators */}
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}

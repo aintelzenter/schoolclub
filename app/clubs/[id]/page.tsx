@@ -131,7 +131,6 @@ const MEETING_ICONS = {
 
 const svgClass = 'w-4 h-4 flex-shrink-0'
 
-/** Short display for School Show long time: "3:45–5:45 · Sun 11am–4pm" */
 function formatSchoolShowTime(raw: string): string {
   const t = raw.trim()
   const mainMatch = t.match(/^(\d{1,2}:\d{2}-\d{1,2}:\d{2})/)
@@ -191,6 +190,7 @@ export default function ClubDetailPage() {
   const club = getClubById(clubId)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState(0)
+  const [doeJourneySheetOpen, setDoeJourneySheetOpen] = useState(false)
   const [doeLevel, setDoeLevel] = useState<DoeAwardLevel>('bronze')
   const [schoolShowProduction, setSchoolShowProduction] = useState<SchoolShowProduction>('frozen')
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
@@ -213,8 +213,6 @@ export default function ClubDetailPage() {
   useEffect(() => {
     if (isDuke) setDoeLevel(getStoredDoeLevel())
   }, [isDuke])
-
-  // School Show: default production theme is Frozen; we do not restore from localStorage so each visit starts with Frozen
 
   useEffect(() => {
     if (isSchoolShow) setEffectsEnabled(getStoredSchoolShowEffectsEnabled(prefersReducedMotion))
@@ -250,7 +248,6 @@ export default function ClubDetailPage() {
     ? schoolShowImages
     : (club.images && club.images.length > 0 ? club.images : mainImage ? [mainImage] : [])
 
-  // Header background only (does not change main image on Browse Clubs). Duke = header image behind gradient + silhouette on top.
   const HEADER_BACKGROUND_IMAGE: Partial<Record<string, string>> = {
     'duke-of-edinburgh': '/clubs/PHOTOS/Duke of Edinburgh/Mainduke.JPG',
     'eco-committee': '/clubs/PHOTOS/Eco Committee/MainECO.PNG',
@@ -262,7 +259,6 @@ export default function ClubDetailPage() {
       ? (schoolShowImages[0] || null)
       : (HEADER_BACKGROUND_IMAGE[club.id] ?? (mainImage || null))
 
-  // Crop/position: lower = show lower part of image (e.g. 50% 80%), higher = show upper part (e.g. 50% 25%). Duke = left so silhouette (right) stays dark.
   const HEADER_BACKGROUND_POSITION: Partial<Record<string, string>> = {
     'duke-of-edinburgh': '28% 50%',
     'tedx': '50% 75%',
@@ -274,7 +270,6 @@ export default function ClubDetailPage() {
     ? '50% 50%'
     : (HEADER_BACKGROUND_POSITION[club.id] ?? '50% 50%')
 
-  // Determine if we need dark text for bright accents (Operation Smile yellow); Duke/School Show themes use accentText for contrast
   const needsDarkText = useMemo(() => {
     if (isDuke && doeTheme) return true
     if (isSchoolShow && schoolShowTheme) {
@@ -303,8 +298,6 @@ export default function ClubDetailPage() {
     [club.description]
   )
   const [aboutExpanded, setAboutExpanded] = useState(false)
-
-  // Cursor spotlight: club accent with lower opacity so it’s not distracting
   useEffect(() => {
     const root = document.documentElement
     const rgb = isSchoolShow && schoolShowTheme
@@ -585,12 +578,12 @@ export default function ClubDetailPage() {
         )}
       </section>
 
-      {/* Single-column content for all clubs except DoFE: details row + About (read more) + body + Gallery + Contact */}
+      {/* Non-Duke: details, About, body, Gallery, Contact */}
       {!isDuke && (
-        <section className="border-t border-white/10 bg-brand-deep scroll-mt-header">
+        <section className="content-visibility-auto border-t border-white/10 bg-brand-deep scroll-mt-header">
           <Container className="py-3 md:py-4">
             <div className="mx-auto max-w-[1150px]">
-            {/* One compact details row */}
+            {/* Details row */}
             <div className="flex flex-wrap gap-2 mb-4">
               {club.meetingDay && (
                 <DetailChip label="Day" value={club.meetingDay} tintHex={effectiveTintHex} />
@@ -609,7 +602,7 @@ export default function ClubDetailPage() {
                 <DetailChip label="Year group" value={club.yearGroup} tintHex={effectiveTintHex} />
               )}
             </div>
-            {/* About with sentence-safe Read more / Show less */}
+            {/* About */}
             {club.description && (
               <div className="mb-5">
                 <h2 className="text-sm font-bold text-white mb-2 tracking-tight" style={{ borderLeft: `3px solid ${effectiveTintHex}`, paddingLeft: 8 }}>
@@ -630,7 +623,7 @@ export default function ClubDetailPage() {
                 )}
               </div>
             )}
-            {/* MUN: Conference Simulation */}
+            {/* MUN tabs */}
             {club.id === 'mun' && (
               <div className="mb-5">
                 <h2 className="text-sm font-bold text-white mb-2 tracking-tight" style={{ borderLeft: `3px solid ${effectiveTintHex}`, paddingLeft: 8 }}>
@@ -670,9 +663,9 @@ export default function ClubDetailPage() {
         </section>
       )}
 
-      {/* Gallery — non-DoFE (above Contact); isolate so its controls don't overlap content below when scrolling */}
+      {/* Gallery */}
       {galleryImages.length > 0 && !isDuke && (
-        <section id="gallery" className="relative z-0 border-t border-white/10 scroll-mt-header">
+        <section id="gallery" className="content-visibility-auto relative z-0 border-t border-white/10 scroll-mt-header">
           <Container className="py-3 md:py-4">
             <div className="mx-auto max-w-[1150px]">
             <h2 className="text-sm font-semibold text-white/90 mb-2 tracking-tight" style={{ borderLeft: `3px solid ${effectiveTintHex}`, paddingLeft: 8 }}>
@@ -693,9 +686,9 @@ export default function ClubDetailPage() {
         </section>
       )}
 
-      {/* Contact — non-DoFE, below Gallery (z-10 so it stacks above gallery when overlapping on scroll) */}
+      {/* Contact */}
       {!isDuke && (
-        <section className="relative z-10 border-t border-white/10 bg-brand-deep scroll-mt-header">
+        <section className="content-visibility-auto relative z-10 border-t border-white/10 bg-brand-deep scroll-mt-header">
           <Container className="py-3 md:py-4">
             <div className="mx-auto max-w-[1150px]">
             <h3 className="text-sm font-bold text-white mb-2 tracking-tight">How to Join</h3>
@@ -738,21 +731,33 @@ export default function ClubDetailPage() {
         </section>
       )}
 
-      {/* DoFE: keep unique layout — content in 2-col with sidebar */}
+      {/* Duke layout */}
       {isDuke && (
         <>
           {club.description && (
-            <section className="border-t border-white/10 bg-brand-deep scroll-mt-header" aria-label="Overview">
+            <section className="content-visibility-auto border-t border-white/10 bg-brand-deep scroll-mt-header" aria-label="Overview">
               <Container className="py-3 md:py-4">
-                <div className="max-w-2xl">
+                <div className="mx-auto max-w-[1150px]">
                   <h2 className="text-sm font-bold text-white mb-2 tracking-tight" style={{ borderLeft: `3px solid ${effectiveTintHex}`, paddingLeft: 8 }}>About</h2>
-                  <p className="text-white/80 text-sm leading-relaxed whitespace-pre-line" style={{ lineHeight: 1.55 }}>{club.description}</p>
+                  <p className="text-white/80 text-sm leading-relaxed whitespace-pre-line" style={{ lineHeight: 1.55 }}>
+                    {aboutExpanded || !aboutNeedsExpand ? club.description : aboutTruncated}
+                  </p>
+                  {aboutNeedsExpand && (
+                    <button
+                      type="button"
+                      onClick={() => setAboutExpanded((e) => !e)}
+                      className="mt-2 text-sm font-medium hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--brand-deep)] rounded"
+                      style={{ color: effectiveTintHex }}
+                    >
+                      {aboutExpanded ? 'Show less' : 'Read more'}
+                    </button>
+                  )}
                 </div>
               </Container>
             </section>
           )}
           {galleryImages.length > 0 && (
-            <section id="gallery" className="relative z-0 border-t border-white/10 scroll-mt-header">
+            <section id="gallery" className="content-visibility-auto relative z-0 border-t border-white/10 scroll-mt-header">
               <Container className="py-3 md:py-4">
                 <h2 className="text-sm font-semibold text-white/90 mb-2 tracking-tight" style={{ borderLeft: `3px solid ${effectiveTintHex}`, paddingLeft: 8 }}>Gallery</h2>
                 <PhotoCarousel
@@ -772,7 +777,7 @@ export default function ClubDetailPage() {
         </>
       )}
 
-      {/* Image lightbox with gallery navigation */}
+      {/* Lightbox */}
       <ImageLightbox
         images={galleryImages}
         currentIndex={lightboxIndex}
@@ -782,9 +787,9 @@ export default function ClubDetailPage() {
         onIndexChange={setLightboxIndex}
       />
 
-      {/* DoFE only: Award levels at a glance (horizontal blocks) + direct entry + 2-column layout; z-10 so it stacks above gallery on scroll */}
+      {/* Duke: award levels + journey map + sidebar */}
       {isDuke && doeTheme && (
-        <Container className="relative z-10 mt-3 md:mt-4">
+        <Container className="content-visibility-auto relative z-10 mt-3 md:mt-4">
           <section id="doe-levels" className="max-w-[1150px] mx-auto mb-4 md:mb-5 scroll-mt-header">
             <h2 className="text-sm font-bold text-white mb-3 tracking-tight" style={{ borderLeft: `3px solid ${doeTheme.accent}`, paddingLeft: 10 }}>Award levels</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-3">
@@ -821,7 +826,7 @@ export default function ClubDetailPage() {
           <div className="grid lg:grid-cols-3 gap-3 md:gap-4 max-w-[1150px] mx-auto">
             <div className="lg:col-span-2 space-y-4">
               <section id="doe-journey-map" className="scroll-mt-header">
-                <DukeJourneyMap level={doeLevel} theme={doeTheme} reducedMotion={prefersReducedMotion} />
+                <DukeJourneyMap level={doeLevel} theme={doeTheme} reducedMotion={prefersReducedMotion} onSheetOpenChange={setDoeJourneySheetOpen} />
               </section>
             </div>
             <div className="lg:col-span-1">
@@ -874,14 +879,14 @@ export default function ClubDetailPage() {
           <p className="max-w-[1150px] mx-auto mt-4 pt-3 border-t border-white/10 text-center text-white/50 text-[11px]">
             For full details, policies, and school-specific requirements, please refer to the{' '}
             <Link href={DOE_OFFICIAL_SITE_URL} target="_blank" rel="noopener noreferrer" className="text-white/70 underline hover:text-white transition-colors">
-              official ANS Duke of Edinburgh website
+              official ANS Duke of Edinburgh International Award website
             </Link>.
           </p>
         </Container>
       )}
 
-      {/* Mobile sticky join bar — hidden when lightbox open so expanded photo can use full screen */}
-      {!lightboxOpen && (
+      {/* Mobile sticky join bar — hidden when lightbox open or Duke journey sheet open so content isn’t blocked */}
+      {!lightboxOpen && !(isDuke && doeJourneySheetOpen) && (
       <div
         className={cn(
           'fixed bottom-0 left-0 right-0 z-[100] lg:hidden',

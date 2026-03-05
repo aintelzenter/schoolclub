@@ -64,7 +64,6 @@ export function HowItWorks() {
 
   return (
     <Section id="how-it-works" className="relative overflow-hidden py-8 md:py-10">
-      {/* Very subtle grain */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.025]"
         style={{
@@ -82,11 +81,9 @@ export function HowItWorks() {
           </p>
         </header>
 
-        {/* Alternating: step → animation → step → animation → step → animation */}
         <div className="flex flex-col gap-6 md:gap-8">
           {steps.map((step) => (
             <div key={step.number} className="flex flex-col gap-4">
-              {/* Step block */}
               <div className="flex items-start gap-3">
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-purple text-xs font-semibold text-white">
                   {step.number}
@@ -102,7 +99,6 @@ export function HowItWorks() {
                 <span className="shrink-0 text-white/40">{step.icon}</span>
               </div>
 
-              {/* Animation for this step */}
               <div className={cn(PREVIEW_PANEL_CLASS)} aria-label={`Preview: ${step.title}`}>
                 <div className="flex-1 min-h-0 p-4 md:p-5 flex flex-col">
                   {step.number === 1 && <PreviewBrowse reducedMotion={reducedMotion} />}

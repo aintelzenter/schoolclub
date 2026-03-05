@@ -8,7 +8,6 @@ const DESKTOP_COUNT = { frozen: 12, mermaid: 18, aladdin: 24, beauty: 14 }
 const MOBILE_COUNT = { frozen: 7, mermaid: 12, aladdin: 16, beauty: 10 }
 const ALADDIN_STREAK_COUNT = 5
 
-/** Deterministic values per index. Full-page spread. Duration 10–22s, opacity 0.05–0.16. */
 function getParticleConfig(index: number, theme: SchoolShowProduction) {
   const left = 2 + ((index * 17 + 7) % 94)
   const duration = 10 + (index % 13)
@@ -17,7 +16,6 @@ function getParticleConfig(index: number, theme: SchoolShowProduction) {
   return { left, duration, midOpacity, offset }
 }
 
-/** Mermaid bubbles: left spread, duration, opacity for riseFade. */
 function getMermaidBubbleConfig(index: number) {
   const left = 2 + ((index * 19 + 11) % 96)
   const duration = 12 + (index % 11)
@@ -26,7 +24,6 @@ function getMermaidBubbleConfig(index: number) {
   return { left, duration, midOpacity, offset }
 }
 
-/** Aladdin specks/streaks: config for diagonal drift, spread across viewport, visible. */
 function getAladdinConfig(index: number, isStreak: boolean, total: number) {
   const duration = isStreak ? 12 + (index % 8) : 14 + (index % 13)
   const midOpacity = isStreak ? 0.22 : 0.26 + ((index * 3) % 7) * 0.04
@@ -35,7 +32,6 @@ function getAladdinConfig(index: number, isStreak: boolean, total: number) {
   return { duration, midOpacity, offset, leftPct }
 }
 
-/** Snowflake SVG — 6 main arms + 6 shorter arms */
 function SnowflakeIcon({ size, opacity }: { size: number; opacity: number }) {
   return (
     <svg
@@ -48,14 +44,12 @@ function SnowflakeIcon({ size, opacity }: { size: number; opacity: number }) {
       strokeLinecap="round"
       style={{ opacity, filter: 'blur(0.4px)' }}
     >
-      {/* 6 main arms */}
       <line x1={12} y1={12} x2={12} y2={2} />
       <line x1={12} y1={12} x2={18} y2={6} />
       <line x1={12} y1={12} x2={18} y2={18} />
       <line x1={12} y1={12} x2={12} y2={22} />
       <line x1={12} y1={12} x2={6} y2={18} />
       <line x1={12} y1={12} x2={6} y2={6} />
-      {/* 6 shorter arms */}
       <line x1={12} y1={12} x2={15} y2={4} />
       <line x1={12} y1={12} x2={20} y2={12} />
       <line x1={12} y1={12} x2={15} y2={20} />
@@ -67,7 +61,6 @@ function SnowflakeIcon({ size, opacity }: { size: number; opacity: number }) {
   )
 }
 
-/** Beauty: sparkle/diamond glint SVG — soft warm gold, visible enough for fade in/out. */
 function BeautySparkleIcon({ size }: { size: number }) {
   return (
     <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="rgba(255,220,150,0.7)" strokeWidth={1}>
@@ -77,7 +70,6 @@ function BeautySparkleIcon({ size }: { size: number }) {
   )
 }
 
-/** Beauty sparkle spawner: random positions across the screen, not too frequent, clearly visible. */
 function BeautySparkleSpawner({ reducedMotion }: { reducedMotion: boolean }) {
   const poolSize = 10
   const sparkleRefs = useRef<(HTMLDivElement | null)[]>([])
@@ -86,7 +78,6 @@ function BeautySparkleSpawner({ reducedMotion }: { reducedMotion: boolean }) {
   )
   const spawnTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  /** Random across viewport (with small edge margin). Not too dense. */
   const pickPosition = useCallback(() => ({
     left: 4 + Math.random() * 92,
     top: 6 + Math.random() * 88,
@@ -170,10 +161,6 @@ interface ThemeEffectsLayerProps {
   reducedMotion: boolean
 }
 
-/**
- * Full-page fixed theme effects layer for School Show. Covers entire viewport.
- * Four distinct themes: Frozen snowflakes, Mermaid droplets, Aladdin dust, Beauty sparkles.
- */
 export function ThemeEffectsLayer({ theme, enabled, reducedMotion }: ThemeEffectsLayerProps) {
   const [displayTheme, setDisplayTheme] = useState(theme)
   const [opacity, setOpacity] = useState(1)
@@ -304,7 +291,6 @@ export function ThemeEffectsLayer({ theme, enabled, reducedMotion }: ThemeEffect
         )}
         {displayTheme === 'beauty' && <BeautySparkleSpawner reducedMotion={reducedMotion} />}
       </div>
-      {/* Readability scrim: subtle darkening on left for text contrast */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{

@@ -4,12 +4,10 @@ import { cn } from '@/lib/utils/cn'
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-/** Featured media card: 16:9, max-h ~260–320px desktop, glass border, manual carousel + thumbnails. Optional cursor-based tilt (desktop). */
 export interface FeaturedMediaCardProps {
   images: string[]
   alt?: string
   className?: string
-  /** Enable subtle cursor-based tilt (desktop only) — e.g. for performing-arts */
   enableTilt?: boolean
 }
 

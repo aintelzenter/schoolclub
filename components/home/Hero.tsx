@@ -57,10 +57,8 @@ function TypewriterText() {
 export function Hero() {
   return (
     <section className="relative min-h-[100vh] min-h-[100dvh] flex items-center pt-[var(--header-height)] -mt-[var(--header-height)] overflow-hidden">
-      {/* Background image slideshow - full bleed, fixed position */}
       <HeroImageShuffle />
 
-      {/* Gradient orbs - subtle, GPU-friendly (reduced motion: static) */}
       <motion.div
         animate={{ scale: 1.05, opacity: 0.4 }}
         transition={{ duration: 0.1 }}
@@ -72,7 +70,6 @@ export function Hero() {
         className="absolute bottom-1/4 -left-1/4 w-[400px] h-[400px] rounded-full bg-brand-pink/15 blur-[90px] z-[1] will-change-auto"
       />
 
-      {/* Left-side scrim - dark gradient behind text area only */}
       <div
         className="absolute left-0 top-0 bottom-0 w-full max-w-[min(100%,42rem)] z-[2] pointer-events-none"
         style={{
@@ -82,7 +79,6 @@ export function Hero() {
 
       <Container className="relative z-10">
         <div className="max-w-2xl">
-          {/* Hero content - single column over background */}
           <div className="pt-2">
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
@@ -150,7 +146,6 @@ export function Hero() {
         </div>
       </Container>
 
-      {/* Scroll indicator */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

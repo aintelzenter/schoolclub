@@ -2,19 +2,14 @@
 
 import type { SchoolShowProduction } from '@/lib/schoolShowThemes'
 import { cn } from '@/lib/utils/cn'
+import Image from 'next/image'
 
 export interface StagePosterProps {
-  /** School Show hero photo as background */
   imageSrc: string
   production: SchoolShowProduction
   className?: string
 }
 
-
-/**
- * Single right-column “Stage Poster” block: photo + bottom gradient, no theme tint.
- * Stays inside hero; no floating or absolute escape.
- */
 export function StagePoster({
   imageSrc,
   production,
@@ -30,6 +25,13 @@ export function StagePoster({
       )}
       aria-hidden
     >
+      <Image
+        src={imageSrc}
+        alt=""
+        fill
+        className="object-cover"
+        sizes="(max-width: 768px) 100vw, 400px"
+      />
       <div
         className="absolute inset-0 pointer-events-none"
         style={{

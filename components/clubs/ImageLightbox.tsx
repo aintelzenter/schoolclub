@@ -5,9 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 export interface ImageLightboxProps {
-  /** All images in gallery */
   images: string[]
-  /** Currently displayed image index */
   currentIndex: number
   alt: string
   open: boolean
@@ -15,7 +13,6 @@ export interface ImageLightboxProps {
   onIndexChange?: (index: number) => void
 }
 
-/** Legacy single-image interface for backwards compatibility */
 export interface ImageLightboxLegacyProps {
   src: string
   alt: string
@@ -100,7 +97,6 @@ export function ImageLightbox(
             className="relative flex items-center justify-center w-full h-full p-4 pt-[calc(var(--header-height,5rem)+0.5rem)] pb-6"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Main image — full viewport height below header (bottom bar hidden when lightbox open) */}
             <div className="flex items-center justify-center w-full h-full max-w-[96vw] max-h-[calc(100vh-var(--header-height,5rem)-1rem)]">
               <img
                 src={images[index]}
@@ -110,7 +106,6 @@ export function ImageLightbox(
               />
             </div>
 
-            {/* Close button — below header so it's always visible and clickable */}
             <button
               type="button"
               onClick={onClose}
@@ -155,7 +150,6 @@ export function ImageLightbox(
               </>
             )}
 
-            {/* Counter */}
             {count > 1 && (
               <span className="absolute bottom-6 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-black/60 backdrop-blur-sm text-white/80 text-sm font-medium">
                 {index + 1} / {count}

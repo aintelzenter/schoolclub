@@ -1,12 +1,6 @@
-/**
- * Club-specific tint for overlay gradients.
- * A) Explicit: Operation Smile = yellow, TEDx = red, Duke = green, UNICEF = blue, MUN = light blue.
- * B) Others: deterministic unique color from controlled palette (index-based).
- */
 
 export type ClubTintRgb = { r: number; g: number; b: number }
 
-/** Explicit club color mapping — each club has a distinct hue (no two similar) */
 const TINT_HEX: Record<string, string> = {
   'operation-smile': '#FFC107', // brighter saturated yellow (distinct from SPARK orange)
   tedx: '#ff3b30', // red
@@ -19,7 +13,6 @@ const TINT_HEX: Record<string, string> = {
   'eco-committee': '#14b8a6', // teal (distinct from Duke green, fits eco/water theme)
 }
 
-/** Other clubs: distinct hues, no purple (deterministic, no duplicates) */
 const FALLBACK_PALETTE: string[] = [
   '#f59e0b', // amber
   '#f97316', // orange
@@ -64,7 +57,6 @@ export function getClubTintGradientCss(
   return `linear-gradient(135deg, rgba(${r},${g},${b},${strong}) 0%, rgba(${r},${g},${b},${weak}) 60%, rgba(0,0,0,0) 100%)`
 }
 
-/** Hex string for accent/hover (e.g. buttons, links) on club detail page */
 export function getClubTintHex(clubId: string): string {
   if (TINT_HEX[clubId]) return TINT_HEX[clubId]
   const idx = hashClubId(clubId) % FALLBACK_PALETTE.length

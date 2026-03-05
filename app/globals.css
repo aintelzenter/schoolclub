@@ -8,15 +8,14 @@
   --brand-blue: #3B82F6;
   --brand-navy: #0F172A;
   --brand-deep: #0B1020;
-  --header-height: calc(4rem + env(safe-area-inset-top, 0px)); /* 64px mobile h-16 + safe area */
-  /* Cursor spotlight: default brand gradient; club pages set --cursor-accent and lower --cursor-spotlight-opacity */
+  --header-height: calc(4rem + env(safe-area-inset-top, 0px));
   --cursor-accent: 217, 70, 239;
   --cursor-accent-secondary: 124, 58, 237;
   --cursor-spotlight-opacity: 0.12;
 }
 @media (min-width: 768px) {
   :root {
-    --header-height: calc(5rem + env(safe-area-inset-top, 0px)); /* 80px desktop md:h-20 + safe area */
+    --header-height: calc(5rem + env(safe-area-inset-top, 0px));
   }
 }
 
@@ -26,7 +25,6 @@
 
 html {
   scroll-behavior: smooth;
-  /* 16px base avoids iOS zoom on input focus and keeps rem scaling consistent */
   font-size: 16px;
 }
 
@@ -34,9 +32,11 @@ html {
   html {
     scroll-behavior: auto;
   }
-  /* Only reduce motion for specific high-motion elements (see below). We do NOT
-     override all * transitions/animations here, so normal UI animations still
-     work on mobile when the user has not enabled "Reduce motion". */
+}
+
+.content-visibility-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 400px;
 }
 
 body {
@@ -50,13 +50,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Prevent horizontal overflow on main content (phones/tablets) */
 main {
   overflow-x: hidden;
   min-width: 0;
 }
 
-/* Infinite marquee scroll */
 @keyframes logo-marquee {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
@@ -66,14 +64,12 @@ main {
   animation: logo-marquee 25s linear infinite;
 }
 
-/* Only disable on hover-capable devices; touch (iPad, phones) keeps animations */
 @media (prefers-reduced-motion: reduce) and (hover: hover) {
   .logo-marquee {
     animation: none;
   }
 }
 
-/* About page section headers: pink with subtle glow pulse */
 @keyframes section-heading-glow {
   0%, 100% {
     text-shadow: 0 0 12px rgba(217, 70, 239, 0.35);
@@ -95,7 +91,6 @@ main {
   }
 }
 
-/* Hide scrollbar but keep functionality */
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -105,7 +100,6 @@ main {
   display: none;
 }
 
-/* Custom scrollbar for main content */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -124,7 +118,6 @@ main {
   background: var(--brand-purple);
 }
 
-/* Smooth gradient background pattern */
 .bg-gradient-pattern {
   background-image: 
     radial-gradient(ellipse at top right, rgba(217, 70, 239, 0.1), transparent 50%),
@@ -132,7 +125,6 @@ main {
     radial-gradient(ellipse at center, rgba(59, 130, 246, 0.05), transparent 70%);
 }
 
-/* Text gradient utility */
 .text-gradient {
   background: linear-gradient(135deg, var(--brand-pink), var(--brand-purple));
   -webkit-background-clip: text;
@@ -140,13 +132,11 @@ main {
   background-clip: text;
 }
 
-/* Focus visible for keyboard navigation */
 :focus-visible {
   outline: 2px solid var(--brand-pink);
   outline-offset: 2px;
 }
 
-/* Mobile tap ripple (touch devices only) */
 @keyframes tap-ripple-out {
   0% { transform: scale(0); opacity: 1; }
   40% { transform: scale(1); opacity: 0.7; }
@@ -156,14 +146,12 @@ main {
   .tap-ripple { animation: none !important; opacity: 0 !important; }
 }
 
-/* Animation delay utilities */
 .animation-delay-100 { animation-delay: 100ms; }
 .animation-delay-200 { animation-delay: 200ms; }
 .animation-delay-300 { animation-delay: 300ms; }
 .animation-delay-400 { animation-delay: 400ms; }
 .animation-delay-500 { animation-delay: 500ms; }
 
-/* Text gradient utilities */
 .text-gradient-pink {
   background: linear-gradient(135deg, var(--brand-pink), var(--brand-purple));
   -webkit-background-clip: text;
@@ -192,7 +180,6 @@ main {
   }
 }
 
-/* Subtle glow effect for interactive elements */
 .glow-on-hover {
   transition: box-shadow 0.3s ease;
 }
@@ -201,7 +188,6 @@ main {
   box-shadow: 0 0 20px rgba(217, 70, 239, 0.3);
 }
 
-/* Section anchors: prevent fixed header from hiding content on in-page nav */
 .scroll-mt-header {
   scroll-margin-top: var(--header-height);
 }
@@ -211,7 +197,6 @@ main {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* Club card hover: soft hue glow + thin border + lift (desktop only, class added when hover capable) */
 .club-card-hue-hover {
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
@@ -222,12 +207,10 @@ main {
   border-color: rgba(var(--card-hue, 255, 255, 255), 0.4);
 }
 
-/* Club card title: on hover, subtle shift toward club hue (very low saturation, desktop only) */
 .club-card-hue-hover:hover .club-card-title {
   color: color-mix(in srgb, white 90%, rgb(var(--card-hue, 255 255 255)));
 }
 
-/* Photo carousel dots */
 .carousel-dot {
   transition: all 0.25s ease;
 }
@@ -236,7 +219,6 @@ main {
   border-radius: 9999px;
 }
 
-/* Duke of Edinburgh: theme transition (short for snappier feel) */
 .doe-page-wrapper {
   transition:
     background-color 0.2s ease,
@@ -257,7 +239,6 @@ main {
   }
 }
 
-/* School Show: production theme wrapper (shorter for snappier feel) */
 .school-show-page-wrapper {
   transition:
     background-color 0.2s ease,
@@ -279,7 +260,6 @@ main {
   }
 }
 
-/* Club hero: compact on desktop; on mobile allow full height so selectors (Duke/School Show) stay visible */
 .club-hero-section {
   padding-top: 0.5rem;
   padding-bottom: 0.75rem;
@@ -291,7 +271,6 @@ main {
   }
 }
 
-/* School Show hero: same padding as club hero; height controlled by section classes */
 .school-show-hero-section {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
@@ -303,23 +282,21 @@ main {
   }
 }
 
-/* School Show: split-stage hero. Subtle grain only; no motion, no panels, no patterns. */
 .school-show-hero-grain {
   opacity: 0.035;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-repeat: repeat;
 }
 
-/* School Show: full-page theme effects layer (fixed viewport) */
 .theme-effects-layer {
   transition: opacity 280ms ease;
+  contain: layout style paint;
 }
 
 .theme-eff {
   will-change: transform, opacity;
 }
 
-/* Fall + fade: spawn above, fall, fade out below. Opacity 0.05-0.16 mid-flight. */
 @keyframes theme-eff-fall-fade {
   0%   { transform: translate3d(0, -15vh, 0); opacity: 0; }
   10%  { opacity: var(--p-midOpacity, 0.1); }
@@ -327,7 +304,6 @@ main {
   100% { transform: translate3d(0, 110vh, 0); opacity: 0; }
 }
 
-/* Frozen: fall + sway + rotation (linear fall -15vh to 110vh, gentle sway, slow spin) */
 @keyframes theme-eff-frozen {
   0%   { transform: translate3d(0, -15vh, 0) rotate(0deg); opacity: 0; }
   10%  { transform: translate3d(6px, -2vh, 0) rotate(36deg); opacity: var(--p-midOpacity, 0.1); }
@@ -336,7 +312,6 @@ main {
   100% { transform: translate3d(0, 110vh, 0) rotate(360deg); opacity: 0; }
 }
 
-/* Mermaid: bubbles appear from bottom, rise up, fade at top — clean and professional */
 @keyframes theme-eff-mermaid {
   0%   { transform: translate3d(0, 110vh, 0); opacity: 0; }
   8%   { transform: translate3d(3px, 100vh, 0); opacity: 0.12; }
@@ -346,7 +321,6 @@ main {
   100% { transform: translate3d(0, -18vh, 0); opacity: 0; }
 }
 
-/* Aladdin specks: diagonal drift, noticeable warm sand dust */
 @keyframes theme-eff-aladdin-speck {
   0%   { transform: translate3d(-10vw, 110vh, 0); opacity: 0; }
   10%  { transform: translate3d(5vw, 90vh, 0); opacity: var(--p-midOpacity, 0.3); }
@@ -354,7 +328,6 @@ main {
   100% { transform: translate3d(110vw, -10vh, 0); opacity: 0; }
 }
 
-/* Aladdin streaks: same diagonal, noticeable */
 @keyframes theme-eff-aladdin-streak {
   0%   { transform: translate3d(-10vw, 110vh, 0) rotate(-25deg); opacity: 0; }
   10%  { transform: translate3d(8vw, 88vh, 0) rotate(-25deg); opacity: var(--p-midOpacity, 0.25); }
@@ -362,7 +335,6 @@ main {
   100% { transform: translate3d(110vw, -10vh, 0) rotate(-25deg); opacity: 0; }
 }
 
-/* Beauty: smooth fade in/out, noticeable but not harsh */
 @keyframes beauty-sparkle-pop {
   0%    { transform: scale(0.92); opacity: 0; }
   15%   { transform: scale(0.97); opacity: 0.1; }
@@ -400,14 +372,13 @@ main {
   animation: beauty-sparkle-pop var(--p-dur, 2000ms) ease-in-out forwards;
 }
 
-@media (prefers-reduced-motion: reduce) and (hover: hover) {
+@media (prefers-reduced-motion: reduce) {
   .theme-eff,
   .beauty-sparkle-active {
     animation: none !important;
   }
 }
 
-/* Hero buttons: gentle looped breathing (subtle scale) */
 @keyframes hero-btn-breathe {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.012); }
@@ -422,7 +393,6 @@ main {
   }
 }
 
-/* My Applications: radar sweep (paused when prefers-reduced-motion via JS) */
 @keyframes radar-sweep {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }

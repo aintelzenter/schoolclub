@@ -25,7 +25,6 @@ export default function ClubsPage() {
 
   return (
     <div className="relative pt-8 pb-16 min-h-screen">
-      {/* Ultra-subtle background texture (2–3% opacity) */}
       <div
         className="absolute inset-0 pointer-events-none z-0 opacity-[0.025]"
         style={{

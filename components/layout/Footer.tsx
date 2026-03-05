@@ -9,7 +9,6 @@ export function Footer() {
     <footer className="bg-brand-deep border-t border-white/10">
       <Container className="py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12">
-          {/* Brand */}
           <div className="md:col-span-2">
             <Link href="/about#logo" className="flex items-center gap-3 mb-4">
               <span className="relative w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden">
@@ -31,7 +30,6 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Quick Links */}
           <div>
             <h4 className="text-white font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-1">
@@ -58,7 +56,6 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Contact */}
           <div>
             <h4 className="text-white font-semibold mb-4">School</h4>
             <ul className="space-y-2 text-sm text-white/60">

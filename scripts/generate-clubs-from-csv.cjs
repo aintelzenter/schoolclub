@@ -23,9 +23,9 @@ const CLUB_NAME_TO_META = {
   'SPARK Club': { id: 'spark-club', imageFolder: 'SPARK Club' },
   'Interact Club': { id: 'interact-club', imageFolder: 'Interact Club' },
   'Eco Commitee': { id: 'eco-committee', imageFolder: 'Eco Committee' },
-  'Duke of Edinburgh': { id: 'duke-of-edinburgh', imageFolder: 'Duke of Edinburgh' },
+  'Duke of Edinburgh': { id: 'duke-of-edinburgh', imageFolder: 'Duke of Edinburgh', displayName: 'Duke of Edinburgh International Award' },
   'UNICEF Ambassador': { id: 'unicef-ambassador', imageFolder: 'UNICEF Ambassador' },
-  'TEDX': { id: 'tedx', imageFolder: 'TEDX' },
+  'TEDX': { id: 'tedx', imageFolder: 'TEDX', displayName: 'TEDx' },
 }
 
 /** Roles not in CSV; keep for join form / display */
@@ -159,7 +159,7 @@ function run() {
 
     clubs.push({
       id: meta.id,
-      name,
+      name: meta.displayName != null ? meta.displayName : name,
       tagline: firstSentence(description) || description.slice(0, 80),
       description,
       meetingDay,

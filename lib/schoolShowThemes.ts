@@ -1,7 +1,3 @@
-/**
- * School Show club page: production theme palettes (Mermaid, Aladdin, Beauty, Frozen).
- * Used only on the School Show club detail page. CSS variables set on .school-show-page-wrapper.
- */
 
 export type SchoolShowProduction = 'mermaid' | 'aladdin' | 'beauty' | 'frozen'
 
@@ -27,7 +23,6 @@ export interface SchoolShowThemePalette {
   accentRgb: string
 }
 
-/** Mermaid: teal/turquoise (distinct from Frozen). Aladdin: warm sand gold. Beauty: rose/red. Frozen: icy blue (distinct from Mermaid). */
 export const SCHOOL_SHOW_THEMES: Record<SchoolShowProduction, SchoolShowThemePalette> = {
   mermaid: {
     accent: '#0d9488',

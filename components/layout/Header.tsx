@@ -63,7 +63,6 @@ export function Header() {
     >
       <div className="max-w-7xl mx-auto pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:pl-6 sm:pr-6 lg:pl-8 lg:pr-8">
         <div className="flex items-center justify-between h-16 md:h-20 gap-4">
-          {/* Left: school logo + club marquee */}
           <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
             <Link href="/" className="flex flex-shrink-0 items-center min-w-0">
               <Image
@@ -96,7 +95,6 @@ export function Header() {
             </div>
           </div>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-1 flex-shrink-0">
             {navLinks.map((link) => {
               const isActive = pathname === link.href
@@ -118,7 +116,6 @@ export function Header() {
             })}
           </nav>
 
-          {/* Top right: ANSXtra logo (desktop) */}
           <Link href="/about#logo" className="hidden md:flex flex-shrink-0 items-center justify-center rounded-lg transition-opacity hover:opacity-90" aria-label="About the logo">
             <span className="relative flex h-12 w-12">
               <Image
@@ -132,7 +129,6 @@ export function Header() {
             </span>
           </Link>
 
-          {/* Mobile: right logo + menu button (44px min touch targets) */}
           <div className="flex md:hidden items-center gap-1 flex-shrink-0">
             <Link href="/about#logo" className="flex min-h-[44px] min-w-[44px] h-11 w-11 items-center justify-center rounded-lg transition-opacity hover:opacity-90" aria-label="About the logo">
               <Image src="/ansxtra-logo.png" alt="" width={40} height={40} className="object-contain h-10 w-10" />
@@ -169,7 +165,6 @@ export function Header() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {mobileMenuOpen && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}

@@ -3,7 +3,6 @@ import { Club } from './types/club'
 
 const BLANK_PLACEHOLDER_ID = 'blank'
 
-/** Fixed order: Duke, School Show, TEDx, then MUN, Operation Smile, Interact, then rest. */
 const PinnedOrder: string[] = [
   'duke-of-edinburgh',
   'school-show',
@@ -13,7 +12,6 @@ const PinnedOrder: string[] = [
   'interact-club',
 ]
 
-/** Deterministic hash for stable "random" order of remaining clubs */
 function hashId(id: string): number {
   let h = 0
   for (let i = 0; i < id.length; i++) {

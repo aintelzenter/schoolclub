@@ -50,7 +50,6 @@ export function CursorTrail() {
       if (el) {
         el.style.transform = `translate3d(${pos.current.x}px,${pos.current.y}px,0) translate(-50%,-50%)`
       }
-      // Trail: lead dot follows cursor, each next dot follows the previous with lerp
       trailPos.current[0].x += (target.current.x - trailPos.current[0].x) * TRAIL_LERP
       trailPos.current[0].y += (target.current.y - trailPos.current[0].y) * TRAIL_LERP
       for (let i = 1; i < TRAIL_LENGTH; i++) {
@@ -84,7 +83,6 @@ export function CursorTrail() {
 
   return (
     <div className="fixed inset-0 pointer-events-none z-[9999]" aria-hidden>
-      {/* Subtle pink/cool trail dots — same RAF, minimal DOM */}
       {Array.from({ length: TRAIL_LENGTH }, (_, i) => (
         <div
           key={i}

@@ -15,15 +15,10 @@ interface PhotoCarouselProps {
   alt?: string
   onImageClick?: (index: number) => void
   className?: string
-  /** Accent color hex for dots/controls */
   accentHex?: string
-  /** Optional border color (e.g. theme border for Duke page) */
   borderColor?: string
-  /** Cinematic: vignette, crossfade, "Scene X / Y" counter, thin arrows */
   variant?: 'default' | 'cinematic'
-  /** Compact: cap height (360–420px) for layout3 / above-the-fold */
   compact?: boolean
-  /** Club id for club-specific transition animation */
   clubId?: string
 }
 
@@ -90,7 +85,6 @@ export function PhotoCarousel({
       }}
       tabIndex={0}
     >
-      {/* Media frame: aspect-video, fixed max-height for consistent centered layout */}
       <div
         className={cn(
           'relative aspect-video overflow-hidden bg-brand-navy/60 max-h-[320px] md:max-h-[420px] isolate mx-auto',
@@ -116,7 +110,6 @@ export function PhotoCarousel({
             draggable={false}
           />
         </AnimatePresence>
-        {/* Cinematic: dark vignette overlay */}
         {cinematic && (
           <div
             className="absolute inset-0 pointer-events-none"
@@ -127,7 +120,6 @@ export function PhotoCarousel({
           />
         )}
 
-        {/* Prev/Next arrows — over image (old position); bottom bar is z-[100] so it stays on top when scrolling */}
         {count > 1 && (
           <>
             <button
@@ -179,7 +171,6 @@ export function PhotoCarousel({
         )}
       </div>
 
-      {/* Dots — below image */}
       {count > 1 && (
         <div className="flex items-center justify-center gap-2 py-3 px-3">
           {images.map((_, i) => (

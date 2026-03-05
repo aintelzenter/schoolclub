@@ -16,7 +16,6 @@ interface SchoolShowThemeSelectorProps {
   className?: string
 }
 
-/** Segmented control: Production Theme (Mermaid / Aladdin / Beauty). Persists to localStorage. */
 export function SchoolShowThemeSelector({
   value,
   onChange,

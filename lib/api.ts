@@ -1,12 +1,8 @@
-/**
- * Backend API client for club applications.
- * Base URL: NEXT_PUBLIC_API_URL (default http://localhost:5000/api)
- */
+
+import type { ClubApplicationPayload } from '@/lib/applications'
 
 const getBaseUrl = () =>
   (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_API_URL) || 'http://localhost:5000/api'
-
-// --- Types (match backend) ---
 
 export type ApiClub = {
   club_id: string
@@ -33,13 +29,20 @@ export type ApplyRequestBody = {
 
 export type ApplySuccess = { code: 'OK' }
 
+export type ApiApplication = {
+  club_id: string
+  club_name: string
+  club_url?: string
+  student_id: string
+  responses: Record<string, unknown>
+  submitted_at: string
+}
+
 export type ApiError = {
   code: string
   message?: string
   details?: unknown
 }
-
-// --- Helpers ---
 
 async function handleResponse<T>(res: Response, parseJson = true): Promise<T> {
   const body = parseJson ? await res.json().catch(() => ({})) : undefined
@@ -52,7 +55,7 @@ async function handleResponse<T>(res: Response, parseJson = true): Promise<T> {
   return (parseJson ? body : undefined) as T
 }
 
-/** Map frontend slugs (kebab-case) to backend club_id from CSV (snake_case). */
+// Frontend slug → backend club_id (snake_case)
 export const BACKEND_CLUB_ID_MAP: Record<string, string> = {
   'operation-smile': 'operation_smile',
   'school-show': 'school_show',
@@ -65,19 +68,24 @@ export const BACKEND_CLUB_ID_MAP: Record<string, string> = {
   tedx: 'tedx',
 }
 
+const SLUG_BY_BACKEND_ID: Record<string, string> = Object.fromEntries(
+  (Object.entries(BACKEND_CLUB_ID_MAP) as [string, string][]).map(([slug, id]) => [id, slug])
+)
+
 function getBackendClubId(slug: string): string {
   return BACKEND_CLUB_ID_MAP[slug] ?? slug
 }
 
-// --- API calls ---
+function toFrontendSlug(backendClubId: string): string {
+  return SLUG_BY_BACKEND_ID[backendClubId] ?? backendClubId.replace(/_/g, '-')
+}
 
-/** GET /api/clubs – list all clubs */
+/** GET /api/clubs */
 export async function fetchClubs(): Promise<ApiClub[]> {
   const res = await fetch(`${getBaseUrl()}/clubs`, { cache: 'no-store' })
   return handleResponse<ApiClub[]>(res)
 }
 
-/** GET /api/clubs/:clubId/form – get form definition for a club */
 export async function fetchClubForm(clubId: string): Promise<ApiClubForm> {
   const res = await fetch(`${getBaseUrl()}/clubs/${encodeURIComponent(clubId)}/form`, {
     cache: 'no-store',
@@ -85,7 +93,6 @@ export async function fetchClubForm(clubId: string): Promise<ApiClubForm> {
   return handleResponse<ApiClubForm>(res)
 }
 
-/** POST /api/clubs/:clubId/apply – submit application */
 export async function submitApplication(
   clubId: string,
   body: ApplyRequestBody
@@ -99,7 +106,26 @@ export async function submitApplication(
   return handleResponse<ApplySuccess>(res)
 }
 
-/** Human-readable messages for known error codes (404, 409, 403, etc.) */
+export async function fetchStudentApplications(studentId: string): Promise<ClubApplicationPayload[]> {
+  const id = String(studentId).trim()
+  if (!id) return []
+  const res = await fetch(
+    `${getBaseUrl()}/students/${encodeURIComponent(id)}/applications`,
+    { cache: 'no-store' }
+  )
+  if (res.status === 404) return []
+  const data = await handleResponse<ApiApplication[] | { applications?: ApiApplication[] }>(res)
+  const list = Array.isArray(data) ? data : data?.applications ?? []
+  return list.map((app): ClubApplicationPayload => ({
+    club_id: toFrontendSlug(app.club_id),
+    club_name: app.club_name,
+    club_url: app.club_url ?? `/clubs/${toFrontendSlug(app.club_id)}`,
+    student_id: app.student_id,
+    responses: app.responses ?? {},
+    submitted_at: app.submitted_at,
+  }))
+}
+
 export const APPLY_ERROR_MESSAGES: Record<string, string> = {
   CLUB_NOT_FOUND: 'This club was not found.',
   STUDENT_ID_NOT_FOUND: 'This student ID does not exist.',

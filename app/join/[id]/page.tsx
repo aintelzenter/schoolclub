@@ -256,7 +256,6 @@ function getClubFields(clubId: string): FieldDef[] {
       ]
     }
 
-    // Operation Smile / School Show / MUN (and others with no application questions): student ID only
     default:
       return []
   }
@@ -287,11 +286,9 @@ export default function JoinPage() {
   const getValidationErrors = useCallback(() => {
     const newErrors: Record<string, string> = {}
 
-    // Student ID: required, digits-only, exactly 5 digits
     if (!studentId) newErrors.student_id = 'Student ID is required'
     else if (!/^\d{5}$/.test(studentId)) newErrors.student_id = 'Student ID must be exactly 5 digits'
 
-    // Club-specific fields
     for (const field of fields) {
       if (!isVisible(field, state)) continue
       if (!isRequired(field, state)) continue
@@ -352,7 +349,6 @@ export default function JoinPage() {
     setIsSubmitting(true)
     setSubmitError(null)
 
-    // Build API body: responses must be Record<string, string>
     const responsesForApi: Record<string, string> = {}
     const responsesForPayload: Record<string, unknown> = {}
     for (const field of fields) {
@@ -376,7 +372,7 @@ export default function JoinPage() {
 
     const payload: ClubApplicationPayload = {
       club_id: club.id,
-      club_name: club.name,
+      club_name: club.displayName ?? club.name,
       club_url: `/clubs/${club.id}`,
       student_id: studentId,
       responses: responsesForPayload,
@@ -388,13 +384,12 @@ export default function JoinPage() {
         student_id: studentId.trim(),
         responses: responsesForApi,
       })
-      // Keep local copy so "My applications" still works until backend provides list endpoint
       saveApplication(payload)
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
         navigator.vibrate(12)
       }
       const urlParams = new URLSearchParams({
-        club: club.name,
+        club: club.displayName ?? club.name,
         studentId,
       })
       router.push(`/join/confirmation?${urlParams.toString()}`)

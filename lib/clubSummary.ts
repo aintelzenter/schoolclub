@@ -1,10 +1,5 @@
 import type { Club } from './types/club'
 
-/**
- * Build a short summary for club cards: 1–2 sentences, no leading "<Club> is a...".
- * Uses club.summary if set; otherwise derives from description deterministically.
- * Never truncates mid-sentence; no ellipsis.
- */
 export function getClubSummary(club: Club): string {
   if (club.summary && club.summary.trim()) return club.summary.trim()
 

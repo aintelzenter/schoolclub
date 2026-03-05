@@ -97,7 +97,6 @@ export function ClubCard({ club, compact }: ClubCardProps) {
         style={{ background: tintGradientCss }}
         aria-hidden
       />
-      {/* Very subtle noise overlay */}
       <div
         className="absolute inset-0 pointer-events-none opacity-[0.03] mix-blend-overlay"
         style={{
@@ -112,7 +111,6 @@ export function ClubCard({ club, compact }: ClubCardProps) {
 
   const infoPanel = (
     <div className="relative pl-4 pr-4 py-2.5 min-h-0 bg-brand-navy/90 border-t border-white/10 flex flex-col gap-2 flex-1 min-h-[5.5rem]">
-      {/* Club-color accent bar */}
       <div
         className="absolute left-0 top-0 bottom-0 w-[3px] pointer-events-none"
         style={{ backgroundColor: accentBarColor }}
@@ -173,7 +171,6 @@ export function ClubCard({ club, compact }: ClubCardProps) {
         onMouseEnter={handleMouseEnter}
         aria-label={`View ${club.displayName ?? club.name}`}
       >
-        {/* Subtle depth: top highlight + bottom grounding fade */}
         <div
           className="absolute inset-0 pointer-events-none z-10 rounded-2xl overflow-hidden"
           aria-hidden

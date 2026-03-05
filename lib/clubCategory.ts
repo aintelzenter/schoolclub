@@ -1,7 +1,4 @@
-/**
- * Club category for theming: Charity, Academic, Performing Arts, Leadership, Other.
- * Used to apply unique layout/motif per category (rounded vs sharp, accent style, etc.).
- */
+// Club category for layout and theming
 
 export type ClubCategory =
   | 'charity'
@@ -26,7 +23,6 @@ export function getClubCategory(clubId: string): ClubCategory {
   return CATEGORY_BY_ID[clubId] ?? 'other'
 }
 
-/** Personalization section title per club type (one unique section per club) */
 export const PERSONALIZATION_TITLE_BY_CATEGORY: Record<ClubCategory, string> = {
   charity: 'Impact & Outreach',
   academic: "What You'll Learn",
@@ -35,20 +31,15 @@ export const PERSONALIZATION_TITLE_BY_CATEGORY: Record<ClubCategory, string> = {
   other: 'About',
 }
 
-/** Layout/spacing variation by category (for Header Grid and sections) */
 export type CategoryLayout = {
   headerGap: string
   titleSize: string
   sectionHeaderStyle: 'soft' | 'crisp' | 'dynamic' | 'bold'
   cardRounding: string
   dividerStyle: 'calm' | 'sharp' | 'none'
-  /** Thin vertical accent next to title (academic) */
   verticalAccent: boolean
-  /** Journey-style bullets Step 1/2/3 (leadership) */
   journeyBullets: boolean
-  /** Media card tilt on hover (performing-arts) */
   mediaTilt: boolean
-  /** Warm glow behind title (charity) */
   titleGlow: boolean
 }
 

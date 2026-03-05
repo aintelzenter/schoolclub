@@ -12,11 +12,6 @@ interface ClubSignatureProps {
   className?: string
 }
 
-/**
- * Themed interactive "signature" element per club.
- * Each category gets a subtle, unique micro-interaction.
- * Respects prefers-reduced-motion.
- */
 export function ClubSignature({ clubId, category, tintHex, className }: ClubSignatureProps) {
   const [prefersReduced, setPrefersReduced] = useState(false)
 
@@ -94,7 +89,6 @@ function SparkleHover({ tintHex, reduced, className }: { tintHex: string; reduce
 
 
 
-/** Eco Committee: floating leaf particles */
 function LeafFloat({ tintHex, reduced, className }: { tintHex: string; reduced: boolean; className?: string }) {
   return (
     <div className={cn('relative h-8 w-full overflow-hidden', className)}>

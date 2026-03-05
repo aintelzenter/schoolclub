@@ -12,7 +12,6 @@ interface TEDxIdeaBuilderProps {
   className?: string
 }
 
-/** TEDx-relevant interactive: 3-step Idea Builder chips. Purposeful, not decorative. */
 export function TEDxIdeaBuilder({ tintHex, className }: TEDxIdeaBuilderProps) {
   const [topic, setTopic] = useState<string | null>(null)
   const [why, setWhy] = useState<string | null>(null)

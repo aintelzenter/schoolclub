@@ -41,7 +41,6 @@ export function FeaturedClubs() {
 
   return (
     <Section className="relative overflow-hidden">
-      {/* Background gradient */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] rounded-full bg-brand-blue/5 blur-[150px]" />
       
       <Container className="relative">
@@ -108,11 +107,8 @@ export function FeaturedClubs() {
         </div>
       </Container>
 
-      {/* Horizontal scroll container */}
       <div className="relative">
-        {/* Left fade */}
         <div className="absolute left-0 top-0 bottom-4 w-16 bg-gradient-to-r from-brand-deep to-transparent z-10 pointer-events-none" />
-        {/* Right fade */}
         <div className="absolute right-0 top-0 bottom-4 w-16 bg-gradient-to-l from-brand-deep to-transparent z-10 pointer-events-none" />
         
         <div

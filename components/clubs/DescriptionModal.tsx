@@ -12,10 +12,6 @@ interface DescriptionModalProps {
   tintHex?: string
 }
 
-/**
- * Accessible modal that shows the full club description.
- * Includes focus trap, keyboard dismiss, and backdrop click.
- */
 export function DescriptionModal({
   open,
   onClose,
@@ -69,7 +65,6 @@ export function DescriptionModal({
             className="relative w-full max-w-lg max-h-[80vh] rounded-2xl bg-brand-navy border border-white/10 shadow-2xl overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
               <h2 className="text-lg font-bold text-white pr-4 break-words">{clubName}</h2>
               <button
@@ -85,10 +80,8 @@ export function DescriptionModal({
               </button>
             </div>
 
-            {/* Accent bar */}
             <div className="h-0.5" style={{ backgroundColor: `${tintHex}50` }} />
 
-            {/* Description body */}
             <div className="px-6 py-5 overflow-y-auto flex-1">
               <p className="text-white/80 text-sm leading-relaxed whitespace-pre-line">
                 {description}

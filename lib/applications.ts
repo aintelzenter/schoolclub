@@ -3,7 +3,6 @@ export const APPLICATIONS_STORAGE_KEY = 'applications'
 export type ClubApplicationPayload = {
   club_id: string
   club_name: string
-  /** Path to the club page where the application was submitted (e.g. /clubs/duke-of-edinburgh). Backend can prepend origin for full URL. */
   club_url: string
   student_id: string
   responses: Record<string, unknown>
@@ -29,7 +28,6 @@ export function saveApplication(payload: ClubApplicationPayload): void {
   localStorage.setItem(APPLICATIONS_STORAGE_KEY, JSON.stringify(existing))
 }
 
-/** Get all applications for a given student ID (5-digit string). */
 export function getApplicationsByStudentId(studentId: string): ClubApplicationPayload[] {
   const id = String(studentId).trim()
   if (!id) return []
@@ -37,7 +35,6 @@ export function getApplicationsByStudentId(studentId: string): ClubApplicationPa
   return all.filter((a) => String(a.student_id).trim() === id)
 }
 
-/** Clear all stored applications (for testing). */
 export function clearApplications(): void {
   if (typeof window === 'undefined') return
   localStorage.removeItem(APPLICATIONS_STORAGE_KEY)

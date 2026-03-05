@@ -1,20 +1,15 @@
-/**
- * Club-specific carousel transition presets.
- * Each club gets a distinct animation that fits its theme.
- */
-
 export type CarouselTransitionPreset =
-  | 'slide'       // default: horizontal slide
-  | 'fade'        // crossfade
-  | 'warm'        // gentle scale + fade (Operation Smile)
-  | 'stage'       // vertical slide, stage curtain (School Show)
-  | 'journey'     // slide + slight scale (Duke of Edinburgh)
-  | 'crisp'       // snappy horizontal slide (MUN)
-  | 'idea'        // scale up from center (TEDx)
-  | 'spark'       // quick slide with bounce (SPARK)
-  | 'community'   // soft fade + slide (Interact)
-  | 'growth'      // fade + upward drift (Eco Committee)
-  | 'hope'        // fade + scale up (UNICEF)
+  | 'slide'
+  | 'fade'
+  | 'warm'
+  | 'stage'
+  | 'journey'
+  | 'crisp'
+  | 'idea'
+  | 'spark'
+  | 'community'
+  | 'growth'
+  | 'hope'
 
 export type SlideVariants = {
   enter: object | ((d: number) => object)
@@ -27,7 +22,6 @@ export type TransitionConfig = {
   ease: readonly number[] | number[] | string
 }
 
-/** Snappy ease: quick out, smooth end */
 const EASE_OUT = [0.22, 0.61, 0.36, 1] as const
 
 const slide: SlideVariants = {

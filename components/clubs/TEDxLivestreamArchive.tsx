@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils/cn'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-/** TEDx red: premium, not neon */
 const TEDX_RED = '#c92a2a'
 
 const ARCHIVE_ITEMS = [
@@ -251,7 +250,6 @@ function ArchiveCard({ year, videoId, mostRecent, onSelect, useHqThumbnail, onTh
       whileTap={{ scale: 0.99 }}
       aria-label={`Watch TEDx ${year} livestream`}
     >
-      {/* Thumbnail background */}
       <span className="absolute inset-0 block bg-black">
         <img
           src={thumbUrl}
@@ -261,14 +259,12 @@ function ArchiveCard({ year, videoId, mostRecent, onSelect, useHqThumbnail, onTh
           loading="lazy"
         />
       </span>
-      {/* Dark gradient overlay */}
       <span
         className="absolute inset-0 pointer-events-none"
         style={{
           background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 45%, rgba(0,0,0,0.2) 100%)',
         }}
       />
-      {/* Content */}
       <span className="absolute inset-0 flex flex-col justify-end p-4">
         {mostRecent && (
           <span

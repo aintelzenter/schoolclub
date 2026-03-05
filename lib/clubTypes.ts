@@ -1,7 +1,3 @@
-/**
- * Club type for card pills (Charity, Academic, Performing Arts, etc.)
- */
-
 const CLUB_TYPE_BY_ID: Record<string, string> = {
   'operation-smile': 'Charity',
   'school-show': 'Performing Arts',

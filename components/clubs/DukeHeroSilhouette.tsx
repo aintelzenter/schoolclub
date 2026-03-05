@@ -6,16 +6,10 @@ import { useEffect, useRef, useState } from 'react'
 
 interface DukeHeroSilhouetteProps {
   level: DoeAwardLevel
-  /** Accent comes from CSS var(--doe-accent) when parent sets it */
   reducedMotion: boolean
   className?: string
 }
 
-/**
- * Adventure silhouette: varies by award level.
- * Bronze = minimal, Silver = medium, Gold = most grand.
- * Uses CSS variable --doe-accent for theming.
- */
 export function DukeHeroSilhouette({ level, reducedMotion, className }: DukeHeroSilhouetteProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [parallax, setParallax] = useState({ x: 0, y: 0 })
@@ -71,7 +65,6 @@ export function DukeHeroSilhouette({ level, reducedMotion, className }: DukeHero
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* Bronze: 2 layers only. Silver/Gold: back ridge */}
         {(isSilver || isGold) && (
           <path
             d="M0 150 L0 110 L40 85 L85 105 L120 75 L160 95 L200 65 L260 90 L260 150 Z"
@@ -80,7 +73,6 @@ export function DukeHeroSilhouette({ level, reducedMotion, className }: DukeHero
           />
         )}
 
-        {/* All: mid layer */}
         <path
           d="M0 150 L0 98 L38 68 L72 88 L108 58 L142 78 L178 48 L218 72 L260 52 L260 150 Z"
           fill="var(--doe-accent)"
@@ -94,7 +86,6 @@ export function DukeHeroSilhouette({ level, reducedMotion, className }: DukeHero
           fillOpacity={isBronze ? 0.78 : 0.88}
         />
 
-        {/* Gold only: extra front detail (closer peak) */}
         {isGold && (
           <path
             d="M180 150 L180 72 L210 52 L260 68 L260 150 Z"
@@ -103,7 +94,6 @@ export function DukeHeroSilhouette({ level, reducedMotion, className }: DukeHero
           />
         )}
 
-        {/* Trail: Bronze = shorter/simpler, Silver = current, Gold = longer with extra segment */}
         <path
           d={
             isBronze
@@ -129,7 +119,6 @@ export function DukeHeroSilhouette({ level, reducedMotion, className }: DukeHero
           />
         )}
 
-        {/* Flag: Bronze = smaller */}
         <path
           d={
             isBronze
@@ -142,7 +131,6 @@ export function DukeHeroSilhouette({ level, reducedMotion, className }: DukeHero
           fillOpacity="0.95"
         />
 
-        {/* Silver/Gold: compass. Gold = larger with inner ring */}
         {(isSilver || isGold) && (
           <>
             <circle
