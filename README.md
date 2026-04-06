@@ -89,4 +89,3 @@ Make sure Supabase backend is set up (profiles table + RLS policies in Supabase 
 Set the production NEXTAUTH_URL to your deployed URL (e.g., https://your-app.vercel.app).
 
 ''''
-
