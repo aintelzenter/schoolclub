@@ -13,7 +13,9 @@ import { cn } from '@/lib/utils/cn'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { notFound, useParams, useRouter } from 'next/navigation'
-import { FormEvent, ReactNode, useCallback, useMemo, useRef, useState } from 'react'
+import { FormEvent, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useSession } from 'next-auth/react'
+import { supabase } from '@/lib/supabase'
 
 type FieldKind = 'text' | 'textarea' | 'date' | 'radio' | 'checkbox' | 'checkboxGroup'
 type ResponseValue = string | boolean | string[]
@@ -264,6 +266,7 @@ function getClubFields(clubId: string): FieldDef[] {
 export default function JoinPage() {
   const params = useParams()
   const router = useRouter()
+  const { data: session, status } = useSession()
   const clubId = params.id as string
   const club = getClubById(clubId)
 
@@ -272,7 +275,35 @@ export default function JoinPage() {
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [submitAttempted, setSubmitAttempted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitError, setSubmitError] = useState<{ code: string; message?: string } | null>(null)
+  const [submitError, setSubmitError] = useState<{ code?: string; message: string } | null>(null)
+  const [userProfile, setUserProfile] = useState<{ year_group: number } | null>(null)
+
+  const fetchUserProfile = useCallback(async () => {
+    if (!session?.user?.id) return
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('year_group')
+      .eq('id', session.user.id)
+      .single()
+
+    if (error) {
+      console.error('Error fetching profile:', error)
+      return
+    }
+
+    setUserProfile(data)
+  }, [session])
+
+  useEffect(() => {
+    if (status === 'loading') return
+    if (!session) {
+      router.push('/auth/signin')
+      return
+    }
+
+    fetchUserProfile()
+  }, [session, status, router, fetchUserProfile])
 
   if (!club) {
     notFound()
@@ -316,6 +347,41 @@ export default function JoinPage() {
 
     return newErrors
   }, [studentId, responses, fields, state])
+
+  const validationErrors = useMemo(() => getValidationErrors(), [getValidationErrors])
+  const canSubmit = club.accepting && !isSubmitting && Object.keys(validationErrors).length === 0
+
+  if (status === 'loading') {
+    return <div>Loading...</div>
+  }
+
+  if (!session) {
+    return null
+  }
+
+  // Check eligibility
+  const isEligible = userProfile?.year_group && 
+    userProfile.year_group >= (club.yearGroupMin ?? 7) && 
+    userProfile.year_group <= (club.yearGroupMax ?? 13)
+
+  if (userProfile && !isEligible) {
+    return (
+      <div className="min-h-screen bg-brand-deep pt-24 pb-12">
+        <Container size="narrow">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-white mb-4">Not Eligible</h1>
+            <p className="text-white/70 mb-6">
+              This club is only available for Year {club.yearGroupMin}-{club.yearGroupMax} students. 
+              You are in Year {userProfile.year_group}.
+            </p>
+            <Link href="/clubs">
+              <Button>Browse Other Clubs</Button>
+            </Link>
+          </div>
+        </Container>
+      </div>
+    )
+  }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -404,9 +470,6 @@ export default function JoinPage() {
       setIsSubmitting(false)
     }
   }
-
-  const validationErrors = useMemo(() => getValidationErrors(), [getValidationErrors])
-  const canSubmit = club.accepting && !isSubmitting && Object.keys(validationErrors).length === 0
 
   const showErrorFor = (key: string) => submitAttempted || touched[key]
 

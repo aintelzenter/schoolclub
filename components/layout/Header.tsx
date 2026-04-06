@@ -6,6 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { useSession, signIn, signOut } from 'next-auth/react'
 
 const LOGOS = [
   { src: '/clubs/PHOTOS/Logos/IMG_3165.PNG', name: 'Club' },
@@ -30,6 +31,7 @@ export function Header() {
   const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { data: session, status } = useSession()
 
   useEffect(() => {
     let raf = 0
@@ -114,6 +116,23 @@ export function Header() {
                 </Link>
               )
             })}
+            {status === 'loading' ? (
+              <div className="px-3.5 py-2.5 text-sm text-white/75">Loading...</div>
+            ) : session ? (
+              <button
+                onClick={() => signOut()}
+                className="px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-out border backdrop-blur-md text-white/75 border-transparent hover:text-white hover:bg-white/[0.06] hover:border-white/5 hover:-translate-y-0.5"
+              >
+                Sign Out
+              </button>
+            ) : (
+              <button
+                onClick={() => signIn('google')}
+                className="px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-out border backdrop-blur-md text-white/75 border-transparent hover:text-white hover:bg-white/[0.06] hover:border-white/5 hover:-translate-y-0.5"
+              >
+                Sign In
+              </button>
+            )}
           </nav>
 
           <Link href="/about#logo" className="hidden md:flex flex-shrink-0 items-center justify-center rounded-lg transition-opacity hover:opacity-90" aria-label="About the logo">
@@ -191,6 +210,23 @@ export function Header() {
                 </Link>
               )
             })}
+            {status === 'loading' ? (
+              <div className="px-4 py-3 text-base text-white/75">Loading...</div>
+            ) : session ? (
+              <button
+                onClick={() => signOut()}
+                className="block w-full text-left px-4 py-3 rounded-xl text-base font-medium transition-all duration-300 ease-out text-white/75 hover:text-white hover:bg-white/[0.06]"
+              >
+                Sign Out
+              </button>
+            ) : (
+              <button
+                onClick={() => signIn('google')}
+                className="block w-full text-left px-4 py-3 rounded-xl text-base font-medium transition-all duration-300 ease-out text-white/75 hover:text-white hover:bg-white/[0.06]"
+              >
+                Sign In
+              </button>
+            )}
           </nav>
         </motion.div>
       )}

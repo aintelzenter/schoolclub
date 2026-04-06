@@ -6,7 +6,9 @@ import { Container } from '@/components/ui/Container'
 import { getClubs } from '@/lib/data'
 import { Club } from '@/lib/types/club'
 import { motion } from 'framer-motion'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+import { supabaseClient as supabase } from '@/lib/supabase'
 
 function clubMatchesYear(club: Club, year: number): boolean {
   const min = club.yearGroupMin ?? 7
@@ -16,7 +18,33 @@ function clubMatchesYear(club: Club, year: number): boolean {
 
 export default function ClubsPage() {
   const allClubs = getClubs()
+  const { data: session } = useSession()
   const [yearGroupFilter, setYearGroupFilter] = useState<YearGroupFilter>('all')
+  const [userYearGroup, setUserYearGroup] = useState<number | null>(null)
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!session?.user?.id) return
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('year_group')
+        .eq('id', session.user.id)
+        .single()
+
+      if (error) {
+        console.error('Error fetching profile:', error)
+        return
+      }
+
+      if (data?.year_group) {
+        setUserYearGroup(data.year_group)
+        setYearGroupFilter(data.year_group) // Set default filter to user's year
+      }
+    }
+
+    fetchUserProfile()
+  }, [session])
 
   const filteredClubs = useMemo(() => {
     if (yearGroupFilter === 'all') return allClubs
@@ -45,7 +73,11 @@ export default function ClubsPage() {
               Browse <span className="text-brand-pink font-semibold">clubs</span>
             </h1>
             <p className="text-white/50 text-sm mt-1 font-normal">
-              Showing <span className="font-semibold">{filteredClubs.length}</span> of <span className="font-semibold">{allClubs.length}</span> clubs
+              {userYearGroup ? (
+                <>Showing clubs for <span className="font-semibold">Year {userYearGroup}</span> ({filteredClubs.length} clubs)</>
+              ) : (
+                <>Showing <span className="font-semibold">{filteredClubs.length}</span> of <span className="font-semibold">{allClubs.length}</span> clubs</>
+              )}
             </p>
           </div>
           <div className="flex-shrink-0">

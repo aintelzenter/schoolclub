@@ -81,3 +81,12 @@ ansxtra-clubsweb/
 ```
 
 
+'''
+What You Need to Do Before Deploying
+Ensure .env.local is not committed (it should be in .gitignore).
+Fill in required env vars (Supabase keys, Google OAuth, NEXTAUTH_SECRET).
+Make sure Supabase backend is set up (profiles table + RLS policies in Supabase SQL editor).
+Set the production NEXTAUTH_URL to your deployed URL (e.g., https://your-app.vercel.app).
+
+''''
+

@@ -97,11 +97,10 @@ export async function submitApplication(
   clubId: string,
   body: ApplyRequestBody
 ): Promise<ApplySuccess> {
-  const backendId = getBackendClubId(clubId)
-  const res = await fetch(`${getBaseUrl()}/clubs/${encodeURIComponent(backendId)}/apply`, {
+  const res = await fetch('/api/join', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ clubId }),
   })
   return handleResponse<ApplySuccess>(res)
 }
