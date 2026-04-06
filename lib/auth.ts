@@ -58,21 +58,35 @@ export const authOptions: NextAuthOptions = {
 
       return session;
     },
-    // async signIn({ user, account, profile }) {
-    //   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
-    //   // Check if user has a profile with year_group
-    //   const { data } = await supabase
-    //     .from('profiles')
-    //     .select('year_group')
-    //     .eq('id', user.id)
-    //     .single();
+    async signIn({ user, account, profile }) {
+      if (account?.provider === 'google' && account.id_token) {
+        const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+        const { data, error } = await supabase.auth.signInWithIdToken({
+          provider: 'google',
+          token: account.id_token,
+        })
+        if (error) {
+          console.error('Supabase sign in error:', error)
+          return false
+        }
+        // Set the user.id to Supabase user id
+        user.id = data.user.id
+      }
 
-    //   if (!data?.year_group) {
-    //     // Redirect to profile setup after sign in
-    //     return '/profile/setup';
-    //   }
-    //   return true;
-    // },
+      // Check if user has a profile with year_group
+      const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+      const { data } = await supabase
+        .from('profiles')
+        .select('year_group')
+        .eq('id', user.id)
+        .single()
+
+      if (!data?.year_group) {
+        // Redirect to profile setup after sign in
+        return '/profile/setup'
+      }
+      return true
+    },
   },
   pages: {
     signIn: '/auth/signin',

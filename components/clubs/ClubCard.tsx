@@ -12,9 +12,12 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 interface ClubCardProps {
   club: Club
   compact?: boolean
+  selectable?: boolean
+  selected?: boolean
+  onSelect?: (selected: boolean) => void
 }
 
-export function ClubCard({ club, compact }: ClubCardProps) {
+export function ClubCard({ club, compact, selectable, selected, onSelect }: ClubCardProps) {
   const cardRef = useRef<HTMLAnchorElement>(null)
   const [canHover, setCanHover] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
@@ -30,9 +33,10 @@ export function ClubCard({ club, compact }: ClubCardProps) {
   }, [])
 
   const handleMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLAnchorElement>) => {
-      if (!canHover || reducedMotion || !cardRef.current) return
-      const rect = cardRef.current.getBoundingClientRect()
+    (e: React.MouseEvent<HTMLElement>) => {
+      if (!canHover || reducedMotion) return
+      const target = e.currentTarget
+      const rect = target.getBoundingClientRect()
       const w = rect.width
       const h = rect.height
       const x = (e.clientX - rect.left) / w - 0.5
@@ -104,6 +108,16 @@ export function ClubCard({ club, compact }: ClubCardProps) {
         }}
         aria-hidden
       />
+      {selectable && (
+        <div className="absolute top-3 right-3 z-20">
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={(e) => onSelect?.(e.target.checked)}
+            className="w-5 h-5 rounded border-2 border-white/30 bg-white/10 text-brand-pink focus:ring-brand-pink focus:ring-2"
+          />
+        </div>
+      )}
     </div>
   )
 
@@ -161,51 +175,97 @@ export function ClubCard({ club, compact }: ClubCardProps) {
 
   return (
     <>
-      <Link
-        ref={cardRef}
-        href={`/clubs/${club.id}`}
-        className={cn(wrapperClass, 'h-full flex flex-col')}
-        style={{ '--card-hue': hueRgbString } as React.CSSProperties}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        onMouseEnter={handleMouseEnter}
-        aria-label={`View ${club.displayName ?? club.name}`}
-      >
+      {selectable ? (
         <div
-          className="absolute inset-0 pointer-events-none z-10 rounded-2xl overflow-hidden"
-          aria-hidden
+          className={cn(wrapperClass, 'h-full flex flex-col cursor-pointer')}
+          style={{ '--card-hue': hueRgbString } as React.CSSProperties}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          onMouseEnter={handleMouseEnter}
+          aria-label={`Select ${club.displayName ?? club.name}`}
         >
           <div
-            className="absolute inset-x-0 top-0 h-1/3 pointer-events-none"
-            style={{
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 100%)',
-            }}
-          />
-          <div
-            className="absolute inset-x-0 bottom-0 h-1/4 pointer-events-none"
-            style={{
-              background: 'linear-gradient(0deg, rgba(0,0,0,0.08) 0%, transparent 100%)',
-            }}
-          />
+            className="absolute inset-0 pointer-events-none z-10 rounded-2xl overflow-hidden"
+            aria-hidden
+          >
+            <div
+              className="absolute inset-x-0 top-0 h-1/3 pointer-events-none"
+              style={{
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 100%)',
+              }}
+            />
+            <div
+              className="absolute inset-x-0 bottom-0 h-1/4 pointer-events-none"
+              style={{
+                background: 'linear-gradient(0deg, rgba(0,0,0,0.08) 0%, transparent 100%)',
+              }}
+            />
+          </div>
+          <motion.div
+            className="flex flex-col h-full relative"
+            animate={canHover && !reducedMotion ? { y: isHovered ? -6 : 0 } : { y: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            style={
+              canHover && !reducedMotion
+                ? {
+                    rotateX,
+                    rotateY,
+                    transformPerspective: 800,
+                  }
+                : undefined
+            }
+          >
+            {photoSection}
+            {infoPanel}
+          </motion.div>
         </div>
-        <motion.div
-          className="flex flex-col h-full relative"
-          animate={canHover && !reducedMotion ? { y: isHovered ? -6 : 0 } : { y: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          style={
-            canHover && !reducedMotion
-              ? {
-                  rotateX,
-                  rotateY,
-                  transformPerspective: 800,
-                }
-              : undefined
-          }
+      ) : (
+        <Link
+          ref={cardRef}
+          href={`/clubs/${club.id}`}
+          className={cn(wrapperClass, 'h-full flex flex-col')}
+          style={{ '--card-hue': hueRgbString } as React.CSSProperties}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          onMouseEnter={handleMouseEnter}
+          aria-label={`View ${club.displayName ?? club.name}`}
         >
-          {photoSection}
-          {infoPanel}
-        </motion.div>
-      </Link>
+          <div
+            className="absolute inset-0 pointer-events-none z-10 rounded-2xl overflow-hidden"
+            aria-hidden
+          >
+            <div
+              className="absolute inset-x-0 top-0 h-1/3 pointer-events-none"
+              style={{
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 100%)',
+              }}
+            />
+            <div
+              className="absolute inset-x-0 bottom-0 h-1/4 pointer-events-none"
+              style={{
+                background: 'linear-gradient(0deg, rgba(0,0,0,0.08) 0%, transparent 100%)',
+              }}
+            />
+          </div>
+          <motion.div
+            className="flex flex-col h-full relative"
+            animate={canHover && !reducedMotion ? { y: isHovered ? -6 : 0 } : { y: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            style={
+              canHover && !reducedMotion
+                ? {
+                    rotateX,
+                    rotateY,
+                    transformPerspective: 800,
+                  }
+                : undefined
+            }
+          >
+            {photoSection}
+            {infoPanel}
+          </motion.div>
+        </Link>
+      )}
     </>
   )
 }

@@ -6,9 +6,11 @@ import { ClubCard } from './ClubCard'
 
 interface ClubGridProps {
   clubs: Club[]
+  selectedClubs?: Set<string>
+  onClubSelect?: (clubId: string, selected: boolean) => void
 }
 
-export function ClubGrid({ clubs }: ClubGridProps) {
+export function ClubGrid({ clubs, selectedClubs, onClubSelect }: ClubGridProps) {
   if (clubs.length === 0) {
     return (
       <div className="text-center py-16">
@@ -33,7 +35,13 @@ export function ClubGrid({ clubs }: ClubGridProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: index * 0.03 }}
         >
-          <ClubCard club={club} compact />
+          <ClubCard 
+            club={club} 
+            compact 
+            selectable={!!onClubSelect}
+            selected={selectedClubs?.has(club.id) || false}
+            onSelect={onClubSelect ? (selected) => onClubSelect(club.id, selected) : undefined}
+          />
         </motion.div>
       ))}
     </div>

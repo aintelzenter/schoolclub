@@ -9,6 +9,8 @@ import { motion } from 'framer-motion'
 import { useMemo, useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { supabaseClient as supabase } from '@/lib/supabase'
+import { Button } from '@/components/ui/Button'
+import { useRouter } from 'next/navigation'
 
 function clubMatchesYear(club: Club, year: number): boolean {
   const min = club.yearGroupMin ?? 7
@@ -21,6 +23,9 @@ export default function ClubsPage() {
   const { data: session } = useSession()
   const [yearGroupFilter, setYearGroupFilter] = useState<YearGroupFilter>('all')
   const [userYearGroup, setUserYearGroup] = useState<number | null>(null)
+  const [selectedClubs, setSelectedClubs] = useState<Set<string>>(new Set())
+  const [isApplying, setIsApplying] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -38,8 +43,9 @@ export default function ClubsPage() {
       }
 
       if (data?.year_group) {
-        setUserYearGroup(data.year_group)
-        setYearGroupFilter(data.year_group) // Set default filter to user's year
+        const year = typeof data.year_group === 'string' ? parseInt(data.year_group.replace('Y', '')) : data.year_group
+        setUserYearGroup(year)
+        setYearGroupFilter(year) // Set default filter to user's year
       }
     }
 
@@ -50,6 +56,48 @@ export default function ClubsPage() {
     if (yearGroupFilter === 'all') return allClubs
     return allClubs.filter((club) => clubMatchesYear(club, yearGroupFilter as number))
   }, [allClubs, yearGroupFilter])
+
+  const handleClubSelect = (clubId: string, selected: boolean) => {
+    setSelectedClubs(prev => {
+      const newSet = new Set(prev)
+      if (selected) {
+        newSet.add(clubId)
+      } else {
+        newSet.delete(clubId)
+      }
+      return newSet
+    })
+  }
+
+  const handleApply = async () => {
+    if (selectedClubs.size === 0 || !session?.user) return
+
+    setIsApplying(true)
+    try {
+      const response = await fetch('/api/join', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          clubIds: Array.from(selectedClubs),
+        }),
+      })
+
+      if (response.ok) {
+        setSelectedClubs(new Set())
+        router.push('/my-applications')
+      } else {
+        const error = await response.json()
+        alert(`Error: ${error.error}`)
+      }
+    } catch (error) {
+      console.error('Error applying to clubs:', error)
+      alert('Failed to apply to clubs')
+    } finally {
+      setIsApplying(false)
+    }
+  }
 
   return (
     <div className="relative pt-8 pb-16 min-h-screen">
@@ -70,7 +118,7 @@ export default function ClubsPage() {
         >
           <div>
             <h1 className="text-xl font-semibold text-white">
-              Browse <span className="text-brand-pink font-semibold">clubs</span>
+              Select <span className="text-brand-pink font-semibold">clubs</span>
             </h1>
             <p className="text-white/50 text-sm mt-1 font-normal">
               {userYearGroup ? (
@@ -94,8 +142,29 @@ export default function ClubsPage() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.4, delay: 0.05 }}
         >
-          <ClubGrid clubs={filteredClubs} />
+          <ClubGrid 
+            clubs={filteredClubs} 
+            selectedClubs={selectedClubs}
+            onClubSelect={handleClubSelect}
+          />
         </motion.div>
+
+        {/* Apply button */}
+        {selectedClubs.size > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="fixed bottom-6 right-6 z-50"
+          >
+            <Button
+              onClick={handleApply}
+              disabled={isApplying}
+              className="bg-brand-pink hover:bg-brand-pink/90 text-white px-6 py-3 rounded-full shadow-lg"
+            >
+              {isApplying ? 'Applying...' : `Apply to ${selectedClubs.size} Club${selectedClubs.size > 1 ? 's' : ''}`}
+            </Button>
+          </motion.div>
+        )}
       </Container>
     </div>
   )
