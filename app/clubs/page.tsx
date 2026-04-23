@@ -8,7 +8,6 @@ import { Club } from '@/lib/types/club'
 import { motion } from 'framer-motion'
 import { useMemo, useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { supabaseClient as supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/Button'
 import { useRouter } from 'next/navigation'
 
@@ -20,42 +19,65 @@ function clubMatchesYear(club: Club, year: number): boolean {
 
 export default function ClubsPage() {
   const allClubs = getClubs()
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const [yearGroupFilter, setYearGroupFilter] = useState<YearGroupFilter>('all')
   const [userYearGroup, setUserYearGroup] = useState<number | null>(null)
+  const [profileChecked, setProfileChecked] = useState(false)
   const [selectedClubs, setSelectedClubs] = useState<Set<string>>(new Set())
   const [isApplying, setIsApplying] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
     const fetchUserProfile = async () => {
-      if (!session?.user?.id) return
+      if (status === 'loading') return
 
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('year_group')
-        .eq('id', session.user.id)
-        .single()
-
-      if (error) {
-        console.error('Error fetching profile:', error)
+      if (!session?.user?.id) {
+        setUserYearGroup(null)
+        setProfileChecked(true)
         return
       }
+
+      const res = await fetch('/api/profile/me', { cache: 'no-store' })
+      if (!res.ok) {
+        console.error('Failed to fetch profile from /api/profile/me')
+        setProfileChecked(true)
+        return
+      }
+
+      const data = await res.json()
 
       if (data?.year_group) {
         const year = typeof data.year_group === 'string' ? parseInt(data.year_group.replace('Y', '')) : data.year_group
         setUserYearGroup(year)
-        setYearGroupFilter(year) // Set default filter to user's year
+      } else {
+        // Signed-in users must complete profile setup before choosing clubs.
+        router.push('/profile/setup')
       }
+
+      setProfileChecked(true)
     }
 
-    fetchUserProfile()
-  }, [session])
+    void fetchUserProfile()
+  }, [session, status, router])
 
   const filteredClubs = useMemo(() => {
+    if (session?.user?.id) {
+      if (!profileChecked || userYearGroup == null) return []
+      return allClubs.filter((club) => clubMatchesYear(club, userYearGroup))
+    }
+
     if (yearGroupFilter === 'all') return allClubs
     return allClubs.filter((club) => clubMatchesYear(club, yearGroupFilter as number))
-  }, [allClubs, yearGroupFilter])
+  }, [allClubs, yearGroupFilter, session?.user?.id, profileChecked, userYearGroup])
+
+  useEffect(() => {
+    setSelectedClubs((prev) => {
+      if (prev.size === 0) return prev
+      const visible = new Set(filteredClubs.map((club) => club.id))
+      const next = new Set(Array.from(prev).filter((id) => visible.has(id)))
+      return next.size === prev.size ? prev : next
+    })
+  }, [filteredClubs])
 
   const handleClubSelect = (clubId: string, selected: boolean) => {
     setSelectedClubs(prev => {
@@ -121,19 +143,21 @@ export default function ClubsPage() {
               Select <span className="text-brand-pink font-semibold">clubs</span>
             </h1>
             <p className="text-white/50 text-sm mt-1 font-normal">
-              {userYearGroup ? (
+              {session?.user?.id && userYearGroup ? (
                 <>Showing clubs for <span className="font-semibold">Year {userYearGroup}</span> ({filteredClubs.length} clubs)</>
               ) : (
                 <>Showing <span className="font-semibold">{filteredClubs.length}</span> of <span className="font-semibold">{allClubs.length}</span> clubs</>
               )}
             </p>
           </div>
-          <div className="flex-shrink-0">
-            <FilterBar
-              yearGroupFilter={yearGroupFilter}
-              onYearGroupFilterChange={setYearGroupFilter}
-            />
-          </div>
+          {!session?.user?.id && (
+            <div className="flex-shrink-0">
+              <FilterBar
+                yearGroupFilter={yearGroupFilter}
+                onYearGroupFilterChange={setYearGroupFilter}
+              />
+            </div>
+          )}
         </motion.div>
 
         {/* Club grid */}

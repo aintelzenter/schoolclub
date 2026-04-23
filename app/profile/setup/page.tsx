@@ -3,7 +3,6 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
 
 const YEAR_GROUPS = [
   { value: 7, label: 'Year 7' },
@@ -24,22 +23,9 @@ export default function ProfileSetup() {
 
   const checkProfile = useCallback(async () => {
     if (!session?.user?.id) return;
-
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('year_group')
-      .eq('id', session.user.id)
-      .single();
-
-    if (error) {
-      console.error('Error fetching profile:', error);
-      return;
-    }
-
-    if (data?.year_group) {
-      router.push('/');
-    }
-  }, [session, router]);
+    // Profile completeness is already enforced by the signIn callback server-side.
+    // Nothing to do here on the client.
+  }, [session]);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -59,14 +45,16 @@ export default function ProfileSetup() {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase
-      .from('profiles')
-      .update({ year_group: yearGroup })
-      .eq('id', session.user.id);
+    const res = await fetch('/api/profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ year_group: yearGroup }),
+    });
 
-    if (error) {
-      setError('Failed to save profile. Please try again.');
-      console.error('Error updating profile:', error);
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      setError(body.error ?? 'Failed to save profile. Please try again.');
+      console.error('Profile save error:', body);
     } else {
       router.push('/');
     }

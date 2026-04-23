@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSession, signIn, signOut } from 'next-auth/react'
 
 const LOGOS = [
@@ -32,6 +32,23 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { data: session, status } = useSession()
+
+  const isAdmin = useMemo(() => {
+    const email = session?.user?.email?.toLowerCase()
+    if (!email) return false
+
+    const allowed = (process.env.NEXT_PUBLIC_ADMIN_EMAILS ?? '')
+      .split(',')
+      .map((v) => v.trim().toLowerCase())
+      .filter(Boolean)
+
+    return allowed.includes(email)
+  }, [session?.user?.email])
+
+  const visibleNavLinks = useMemo(
+    () => (isAdmin ? [...navLinks, { href: '/admin/applications', label: 'Admin' }] : navLinks),
+    [isAdmin]
+  )
 
   useEffect(() => {
     let raf = 0
@@ -98,7 +115,7 @@ export function Header() {
           </div>
 
           <nav className="hidden md:flex items-center gap-1 flex-shrink-0">
-            {navLinks.map((link) => {
+            {visibleNavLinks.map((link) => {
               const isActive = pathname === link.href
               return (
                 <Link
@@ -192,7 +209,7 @@ export function Header() {
           className="md:hidden bg-brand-deep/95 backdrop-blur-xl border-b border-white/10"
         >
           <nav className="px-4 py-4 space-y-1">
-            {navLinks.map((link) => {
+            {visibleNavLinks.map((link) => {
               const isActive = pathname === link.href
               return (
                 <Link

@@ -43,6 +43,8 @@ export default function MyApplicationsPage() {
   const [applications, setApplications] = useState<Application[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+  const [removingId, setRemovingId] = useState<string | null>(null)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -57,6 +59,7 @@ export default function MyApplicationsPage() {
   const fetchApplications = async () => {
     try {
       setLoading(true)
+      setError(null)
       const response = await fetch('/api/applications')
       if (!response.ok) throw new Error('Failed to fetch applications')
       const data = await response.json()
@@ -65,6 +68,36 @@ export default function MyApplicationsPage() {
       setError(err instanceof Error ? err.message : 'Failed to load applications')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleUnenroll = async (app: Application) => {
+    const confirmed = window.confirm(
+      `Unenroll from ${getClubDisplayName(app.club_id)}? This will remove your application.`
+    )
+
+    if (!confirmed) return
+
+    setRemovingId(app.id)
+    setError(null)
+    setSuccess(null)
+
+    try {
+      const response = await fetch(`/api/applications?id=${encodeURIComponent(app.id)}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}))
+        throw new Error(payload.error || 'Failed to unenroll from club')
+      }
+
+      setApplications((prev) => prev.filter((item) => item.id !== app.id))
+      setSuccess(`You have unenrolled from ${getClubDisplayName(app.club_id)}.`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to unenroll from club')
+    } finally {
+      setRemovingId(null)
     }
   }
 
@@ -102,6 +135,12 @@ export default function MyApplicationsPage() {
             </div>
           )}
 
+          {success && (
+            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-4 text-emerald-300">
+              {success}
+            </div>
+          )}
+
           {applications.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-white/50 mb-4">
@@ -125,7 +164,7 @@ export default function MyApplicationsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   className="bg-white/5 border border-white/10 rounded-lg p-6"
                 >
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between gap-4">
                     <div>
                       <h3 className="text-lg font-semibold text-white">
                         {getClubDisplayName(app.club_id)}
@@ -137,7 +176,7 @@ export default function MyApplicationsPage() {
                         <p className="text-white/70 text-sm mt-2">{app.notes}</p>
                       )}
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap justify-end">
                       {app.status === 'approved' && (
                         <div className="flex items-center gap-2 text-green-400">
                           <Check className="w-5 h-5" />
@@ -155,6 +194,17 @@ export default function MyApplicationsPage() {
                           <Loader2 className="w-5 h-5 animate-spin" />
                           <span className="text-sm font-medium">Pending</span>
                         </div>
+                      )}
+
+                      {(app.status === 'pending' || app.status === 'approved') && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={removingId === app.id}
+                          onClick={() => handleUnenroll(app)}
+                        >
+                          {removingId === app.id ? 'Unenrolling...' : 'Unenroll'}
+                        </Button>
                       )}
                     </div>
                   </div>

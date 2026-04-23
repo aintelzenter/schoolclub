@@ -33,3 +33,26 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- ============================================================
+-- Applications table
+-- ============================================================
+CREATE TABLE applications (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  club_id TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+  applied_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  reviewed_at TIMESTAMP WITH TIME ZONE,
+  notes TEXT,
+  UNIQUE(user_id, club_id)
+);
+
+-- Enable RLS
+ALTER TABLE applications ENABLE ROW LEVEL SECURITY;
+
+-- Users can read their own applications
+CREATE POLICY "Users can view their own applications" ON applications
+  FOR SELECT USING (auth.uid() = user_id);
+
+-- Service role bypasses RLS automatically; no INSERT policy needed for anon users.

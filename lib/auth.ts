@@ -3,6 +3,7 @@ import GoogleProvider from 'next-auth/providers/google';
 import type { NextAuthOptions } from 'next-auth';
 import { createClient } from '@supabase/supabase-js';
 
+
 declare module 'next-auth' {
   interface Session {
     user: {
@@ -58,33 +59,57 @@ export const authOptions: NextAuthOptions = {
 
       return session;
     },
-    async signIn({ user, account, profile }) {
-      if (account?.provider === 'google' && account.id_token) {
-        const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
-        const { data, error } = await supabase.auth.signInWithIdToken({
-          provider: 'google',
-          token: account.id_token,
-        })
-        if (error) {
-          console.error('Supabase sign in error:', error)
-          return false
+    async signIn({ user, account }) {
+      if (account?.provider !== 'google') return true
+
+      const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
+
+      // Look up or create a Supabase auth user matching this Google account.
+      // This avoids signInWithIdToken which requires nonce/audience alignment.
+      const email = user.email!
+      let supabaseUserId: string
+
+      const { data: userList, error: lookupError } =
+        await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
+
+      if (lookupError) {
+        console.error('Supabase admin listUsers failed:', lookupError)
+        const reason = encodeURIComponent(lookupError.message ?? 'Unknown error')
+        return `/auth/signin?error=ProfileLookup&reason=${reason}`
+      }
+
+      const existingUser = userList?.users?.find((u) => u.email === email)
+
+      if (existingUser?.id) {
+        supabaseUserId = existingUser.id
+      } else {
+        // First sign-in: create a Supabase auth user for this Google account.
+        const { data: newUser, error: createError } =
+          await supabaseAdmin.auth.admin.createUser({
+            email,
+            email_confirm: true,
+            user_metadata: {
+              full_name: user.name,
+              avatar_url: user.image,
+              provider: 'google',
+            },
+          })
+        if (createError || !newUser?.user?.id) {
+          console.error('Failed to create Supabase user:', createError)
+          const reason = encodeURIComponent(createError?.message ?? 'Unknown error')
+          return `/auth/signin?error=SupabaseOAuth&reason=${reason}`
         }
-        // Set the user.id to Supabase user id
-        user.id = data.user.id
+        supabaseUserId = newUser.user.id
       }
 
-      // Check if user has a profile with year_group
-      const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
-      const { data } = await supabase
-        .from('profiles')
-        .select('year_group')
-        .eq('id', user.id)
-        .single()
+      // Attach Supabase UUID to the NextAuth user so the JWT/session callbacks
+      // can store it in the token. Profile completeness is checked client-side
+      // after sign-in so that a proper session is always created.
+      user.id = supabaseUserId
 
-      if (!data?.year_group) {
-        // Redirect to profile setup after sign in
-        return '/profile/setup'
-      }
       return true
     },
   },

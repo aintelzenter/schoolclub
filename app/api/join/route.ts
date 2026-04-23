@@ -1,11 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import clubs from '@/data/clubs.json'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
+
+function normalizeYearGroup(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (typeof value === 'string') {
+    const parsed = parseInt(value.replace('Y', '').trim(), 10)
+    return Number.isNaN(parsed) ? null : parsed
+  }
+  return null
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,13 +28,83 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
 
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
     // Support both single clubId and array clubIds
-    const clubIds = body.clubIds || (body.clubId ? [body.clubId] : [])
+    const clubIdsRaw = body.clubIds || (body.clubId ? [body.clubId] : [])
+    const clubIds = Array.from(
+      new Set(
+        (Array.isArray(clubIdsRaw) ? clubIdsRaw : [clubIdsRaw])
+          .map((value) => String(value).trim())
+          .filter(Boolean)
+      )
+    )
 
     if (!clubIds.length) {
       return NextResponse.json(
         { error: 'Missing clubIds' },
         { status: 400 }
+      )
+    }
+
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('year_group')
+      .eq('id', session.user.id)
+      .single()
+
+    if (profileError && profileError.code !== 'PGRST116') {
+      console.error('Error fetching user profile for eligibility check:', profileError)
+      return NextResponse.json(
+        { error: 'Failed to verify profile eligibility' },
+        { status: 500 }
+      )
+    }
+
+    const userYearGroup = normalizeYearGroup(profile?.year_group)
+    if (!userYearGroup) {
+      return NextResponse.json(
+        { error: 'Profile year group is required before applying to clubs' },
+        { status: 400 }
+      )
+    }
+
+    const invalidClubIds = clubIds.filter((clubId) => !clubs.some((club) => club.id === clubId))
+    if (invalidClubIds.length > 0) {
+      return NextResponse.json(
+        { error: 'Invalid clubIds provided', invalidClubIds },
+        { status: 400 }
+      )
+    }
+
+    const ineligibleClubIds = clubIds.filter((clubId) => {
+      const club = clubs.find((item) => item.id === clubId)
+      if (!club) return true
+      const min = club.yearGroupMin ?? 7
+      const max = club.yearGroupMax ?? 13
+      return userYearGroup < min || userYearGroup > max
+    })
+
+    if (ineligibleClubIds.length > 0) {
+      const ineligibleClubs = clubs
+        .filter((club) => ineligibleClubIds.includes(club.id))
+        .map((club) => ({
+          id: club.id,
+          name: club.name,
+          yearGroupMin: club.yearGroupMin ?? 7,
+          yearGroupMax: club.yearGroupMax ?? 13,
+        }))
+
+      return NextResponse.json(
+        {
+          error: 'One or more selected clubs are not available for your year group',
+          userYearGroup,
+          ineligibleClubs,
+        },
+        { status: 403 }
       )
     }
 
