@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "generate-clubs": "node scripts/generate-clubs-from-csv.cjs"
+    "generate-clubs": "node scripts/generate-clubs-from-csv.cjs",
+    "seed-clubs": "node scripts/seed-clubs-to-supabase.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
@@ -20,15 +21,16 @@
     "lucide-react": "^0.344.0",
     "next": "^14.2.0",
     "next-auth": "^4.24.13",
+    "nodemailer": "^7.0.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.50.0",
-    "resend": "^6.10.0",
     "tailwind-merge": "^2.2.1",
     "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
+    "@types/nodemailer": "^6.4.14",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
     "autoprefixer": "^10.4.17",

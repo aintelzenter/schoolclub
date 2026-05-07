@@ -16,7 +16,7 @@ export async function GET() {
 
   const { data, error } = await supabaseAdmin
     .from('profiles')
-    .select('year_group')
+    .select('student_name, student_id, year_group')
     .eq('id', session.user.id)
     .single();
 
@@ -25,5 +25,9 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ year_group: data?.year_group ?? null });
+  return NextResponse.json({
+    student_name: data?.student_name ?? null,
+    student_id: data?.student_id ?? null,
+    year_group: data?.year_group ?? null,
+  });
 }

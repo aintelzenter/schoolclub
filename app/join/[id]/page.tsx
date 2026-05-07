@@ -8,7 +8,8 @@ import { Input, Textarea } from '@/components/ui/Input'
 import { RadioGroup } from '@/components/ui/RadioGroup'
 import { getApplyErrorMessage, submitApplication } from '@/lib/api'
 import { saveApplication, type ClubApplicationPayload } from '@/lib/applications'
-import { getClubById } from '@/lib/data'
+import { fetchClubById } from '@/lib/data'
+import { Club } from '@/lib/types/club'
 import { cn } from '@/lib/utils/cn'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
@@ -42,85 +43,31 @@ function isRequired(field: FieldDef, state: { responses: Record<string, Response
 
 function getClubFields(clubId: string): FieldDef[] {
   switch (clubId) {
+    case 'operation-smile':
+      return []
+
+    case 'school-show':
+      return []
+
+    case 'mun':
+      return []
+
     case 'spark-club':
-      return [
-        {
-          key: 'membership_status',
-          kind: 'radio',
-          label: 'Are you an old or new member?',
-          required: true,
-          options: ['Old member', 'New member'],
-        },
-        {
-          key: 'why_join_expectations',
-          kind: 'textarea',
-          label: 'Why do you want to join SPARK club / what are your expectations?',
-          required: true,
-          minLength: 5,
-          placeholder: 'Write a short response...',
-        },
-        {
-          key: 'fields_of_interest',
-          kind: 'checkboxGroup',
-          label: 'Field(s) of interest',
-          required: true,
-          options: [
-            'Sports',
-            'Arts & Design',
-            'Media / Content',
-            'Science & Tech',
-            'PR / Marketing',
-            'Other',
-          ],
-        },
-        {
-          key: 'fields_of_interest_other',
-          kind: 'text',
-          label: 'Other (please specify)',
-          required: ({ responses }) => Array.isArray(responses.fields_of_interest) && responses.fields_of_interest.includes('Other'),
-          visible: ({ responses }) => Array.isArray(responses.fields_of_interest) && responses.fields_of_interest.includes('Other'),
-          placeholder: 'Type your field of interest...',
-        },
-      ]
+      return []
 
     case 'interact-club':
       return [
         {
-          key: 'why_join',
-          kind: 'textarea',
-          label: 'Why do you want to join Interact Club?',
-          required: true,
-          minLength: 5,
-          placeholder: 'Write a short response...',
-        },
-        {
           key: 'roles',
           kind: 'checkboxGroup',
-          label: 'Which role(s) would you like to be part of?',
+          label: 'Which role(s) (e.g. Finance, events, social media) would you like to be part of?',
           required: true,
           options: ['Finance', 'Events', 'Social Media'],
         },
       ]
 
     case 'eco-committee':
-      return [
-        {
-          key: 'why_join',
-          kind: 'textarea',
-          label: 'Why do you want to join the Eco Committee?',
-          required: true,
-          minLength: 5,
-          placeholder: 'Write a short response...',
-        },
-        {
-          key: 'personal_impact',
-          kind: 'textarea',
-          label: 'How will joining this club affect you as an individual?',
-          required: true,
-          minLength: 5,
-          placeholder: 'Write a short response...',
-        },
-      ]
+      return []
 
     case 'duke-of-edinburgh':
       return [
@@ -195,13 +142,6 @@ function getClubFields(clubId: string): FieldDef[] {
     case 'unicef-ambassador':
       return [
         {
-          key: 'house',
-          kind: 'text',
-          label: 'House',
-          required: true,
-          placeholder: 'Your house...',
-        },
-        {
           key: 'group_selection',
           kind: 'radio',
           label: 'Which group do you want to join within UNICEF?',
@@ -250,7 +190,7 @@ function getClubFields(clubId: string): FieldDef[] {
         {
           key: 'interests_passions_abilities',
           kind: 'textarea',
-          label: 'What are your interests, passions, or abilities?',
+          label: 'Interests, passions, and abilities',
           required: true,
           minLength: 5,
           placeholder: 'Write a short response...',
@@ -268,7 +208,8 @@ export default function JoinPage() {
   const router = useRouter()
   const { data: session, status } = useSession()
   const clubId = params.id as string
-  const club = getClubById(clubId)
+  const [club, setClub] = useState<Club | null>(null)
+  const [clubLoading, setClubLoading] = useState(true)
 
   const [studentId, setStudentId] = useState('')
   const [responses, setResponses] = useState<Record<string, ResponseValue>>({})
@@ -305,11 +246,17 @@ export default function JoinPage() {
     fetchUserProfile()
   }, [session, status, router, fetchUserProfile])
 
-  if (!club) {
-    notFound()
-  }
+  useEffect(() => {
+    const loadClub = async () => {
+      const value = await fetchClubById(clubId)
+      setClub(value ?? null)
+      setClubLoading(false)
+    }
 
-  const fields = useMemo(() => getClubFields(club.id), [club.id])
+    void loadClub()
+  }, [clubId])
+
+  const fields = useMemo(() => getClubFields(club?.id ?? ''), [club?.id])
   const state = useMemo(() => ({ responses }), [responses])
 
   const fieldRefs = useRef<Record<string, HTMLElement | null>>({})
@@ -349,7 +296,15 @@ export default function JoinPage() {
   }, [studentId, responses, fields, state])
 
   const validationErrors = useMemo(() => getValidationErrors(), [getValidationErrors])
-  const canSubmit = club.accepting && !isSubmitting && Object.keys(validationErrors).length === 0
+  const canSubmit = Boolean(club?.accepting) && !isSubmitting && Object.keys(validationErrors).length === 0
+
+  if (clubLoading) {
+    return <div>Loading...</div>
+  }
+
+  if (!club) {
+    notFound()
+  }
 
   if (status === 'loading') {
     return <div>Loading...</div>

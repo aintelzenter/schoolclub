@@ -2,15 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { createClient } from '@supabase/supabase-js';
 import { authOptions } from '@/lib/auth';
-import { getAdminEmails, isAdminEmail } from '@/lib/admin';
-import { Resend } from 'resend';
-import clubs from '@/data/clubs.json';
+import { getAdminEmails } from '@/lib/admin';
+import { getClubByIdFromStore } from '@/lib/clubs-store';
+import { getClubManagerAccess } from '@/lib/access';
+import { sendEmail } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
-
-const resend = process.env.RESEND_API_KEY
-  ? new Resend(process.env.RESEND_API_KEY)
-  : null;
 
 type UpdatePayload = {
   id?: string;
@@ -37,10 +34,8 @@ async function sendStatusNotifications(params: {
   notes: string | null;
   reviewedByEmail: string;
 }) {
-  if (!resend) return;
-
   const supabase = getAdminClient();
-  const clubName = clubs.find((club) => club.id === params.clubId)?.name ?? toTitleCase(params.clubId);
+  const clubName = (await getClubByIdFromStore(params.clubId))?.name ?? toTitleCase(params.clubId);
   const statusLabel = params.status === 'approved' ? 'Approved' : 'Rejected';
 
   const { data: userData, error: userError } = await supabase.auth.admin.getUserById(params.userId);
@@ -51,8 +46,11 @@ async function sendStatusNotifications(params: {
   const userEmail = userData?.user?.email;
   const adminRecipients = getAdminEmails();
 
-  const userEmailPromise = userEmail
-    ? resend.emails.send({
+  const emailPromises = [];
+
+  if (userEmail) {
+    emailPromises.push(
+      sendEmail({
         from: 'ANSxtra <noreply@ansxtra.com>',
         to: userEmail,
         subject: `ANSxtra Application ${statusLabel}: ${clubName}`,
@@ -63,11 +61,15 @@ async function sendStatusNotifications(params: {
           ${params.notes ? `<p><strong>Notes:</strong> ${params.notes}</p>` : ''}
           <p>You can review this in your My Applications page.</p>
         `,
+      }).catch(error => {
+        console.error('User notification email failed:', error);
       })
-    : Promise.resolve(null);
+    );
+  }
 
-  const adminEmailPromise = adminRecipients.length
-    ? resend.emails.send({
+  if (adminRecipients.length > 0) {
+    emailPromises.push(
+      sendEmail({
         from: 'ANSxtra <noreply@ansxtra.com>',
         to: adminRecipients,
         subject: `Application ${statusLabel}: ${clubName}`,
@@ -79,15 +81,13 @@ async function sendStatusNotifications(params: {
           <p><strong>Reviewed by:</strong> ${params.reviewedByEmail}</p>
           ${params.notes ? `<p><strong>Notes:</strong> ${params.notes}</p>` : ''}
         `,
+      }).catch(error => {
+        console.error('Admin notification email failed:', error);
       })
-    : Promise.resolve(null);
-
-  const results = await Promise.allSettled([userEmailPromise, adminEmailPromise]);
-  for (const result of results) {
-    if (result.status === 'rejected') {
-      console.error('Status notification email failed:', result.reason);
-    }
+    );
   }
+
+  await Promise.all(emailPromises);
 }
 
 async function authorizeAdmin() {
@@ -96,11 +96,12 @@ async function authorizeAdmin() {
     return { ok: false as const, response: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) };
   }
 
-  if (!isAdminEmail(session.user.email)) {
+  const access = await getClubManagerAccess(session.user.email);
+  if (!access || (!access.isAdmin && !access.isTeacher)) {
     return { ok: false as const, response: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) };
   }
 
-  return { ok: true as const, session };
+  return { ok: true as const, session, access };
 }
 
 export async function GET() {
@@ -108,11 +109,17 @@ export async function GET() {
   if (!auth.ok) return auth.response;
 
   const supabase = getAdminClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from('applications')
     .select('id,user_id,club_id,status,applied_at,reviewed_at,notes')
     .eq('status', 'pending')
     .order('applied_at', { ascending: true });
+
+  if (!auth.access.isAdmin) {
+    query = query.in('club_id', auth.access.managedClubIds);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error('Admin applications GET failed:', error);
@@ -140,6 +147,24 @@ export async function PATCH(request: NextRequest) {
 
   const targetIds = ids.length > 0 ? ids : [id!];
   const supabase = getAdminClient();
+
+  if (!auth.access.isAdmin) {
+    const { data: scopedRows, error: scopeError } = await supabase
+      .from('applications')
+      .select('id,club_id')
+      .in('id', targetIds);
+
+    if (scopeError) {
+      console.error('Admin applications scope check failed:', scopeError);
+      return NextResponse.json({ error: 'Failed to validate application access' }, { status: 500 });
+    }
+
+    const invalid = (scopedRows ?? []).some((row) => !auth.access.managedClubIds.includes(row.club_id));
+    if (invalid || (scopedRows ?? []).length !== targetIds.length) {
+      return NextResponse.json({ error: 'You can only review applications for your assigned clubs' }, { status: 403 });
+    }
+  }
+
   const { data, error } = await supabase
     .from('applications')
     .update({
@@ -168,7 +193,7 @@ export async function PATCH(request: NextRequest) {
         clubId: row.club_id,
         status: row.status,
         notes: row.notes,
-        reviewedByEmail: auth.session.user.email,
+        reviewedByEmail: auth.session.user.email!,
       })
     )
   );

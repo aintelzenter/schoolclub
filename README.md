@@ -2,6 +2,12 @@
 
 A extracurricular activities portal for Amnuaysilpa School(Built with Next.js 14, TypeScript, and Tailwind CSS)
 
+## Quick Start Guide for Beginners
+
+If you are new, follow this step-by-step guide:
+
+- [LOCALHOST_SETUP_BEGINNER.md](LOCALHOST_SETUP_BEGINNER.md)
+
 ## Features
 
 - **Fully Responsive**: Optimized for mobile, tablet, and desktop

@@ -3,7 +3,7 @@
 import { ClubGrid } from '@/components/clubs/ClubGrid'
 import { FilterBar, type YearGroupFilter } from '@/components/clubs/FilterBar'
 import { Container } from '@/components/ui/Container'
-import { getClubs } from '@/lib/data'
+import { fetchClubs } from '@/lib/data'
 import { Club } from '@/lib/types/club'
 import { motion } from 'framer-motion'
 import { useMemo, useState, useEffect } from 'react'
@@ -18,7 +18,7 @@ function clubMatchesYear(club: Club, year: number): boolean {
 }
 
 export default function ClubsPage() {
-  const allClubs = getClubs()
+  const [allClubs, setAllClubs] = useState<Club[]>([])
   const { data: session, status } = useSession()
   const [yearGroupFilter, setYearGroupFilter] = useState<YearGroupFilter>('all')
   const [userYearGroup, setUserYearGroup] = useState<number | null>(null)
@@ -26,6 +26,15 @@ export default function ClubsPage() {
   const [selectedClubs, setSelectedClubs] = useState<Set<string>>(new Set())
   const [isApplying, setIsApplying] = useState(false)
   const router = useRouter()
+
+  useEffect(() => {
+    const loadClubs = async () => {
+      const clubs = await fetchClubs()
+      setAllClubs(clubs)
+    }
+
+    void loadClubs()
+  }, [])
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -46,7 +55,7 @@ export default function ClubsPage() {
 
       const data = await res.json()
 
-      if (data?.year_group) {
+      if (data?.year_group && data?.student_name && data?.student_id) {
         const year = typeof data.year_group === 'string' ? parseInt(data.year_group.replace('Y', '')) : data.year_group
         setUserYearGroup(year)
       } else {
@@ -94,6 +103,26 @@ export default function ClubsPage() {
   const handleApply = async () => {
     if (selectedClubs.size === 0 || !session?.user) return
 
+    const selectedClubIds = Array.from(selectedClubs)
+    const selectedClubRecords = allClubs.filter((club) => selectedClubs.has(club.id))
+    const clubsWithQuestions = selectedClubRecords.filter((club) => {
+      const raw = club.applicationQuestionsRaw
+      return typeof raw === 'string' && raw.trim().length > 0
+    })
+
+    // Route through the per-club join flow so required questions are answered.
+    if (selectedClubIds.length === 1) {
+      router.push(`/join/${selectedClubIds[0]}`)
+      return
+    }
+
+    if (clubsWithQuestions.length > 0) {
+      const names = clubsWithQuestions.map((club) => club.displayName ?? club.name).join(', ')
+      alert(`These clubs require application questions: ${names}. Please apply to them one by one.`)
+      router.push(`/join/${clubsWithQuestions[0].id}`)
+      return
+    }
+
     setIsApplying(true)
     try {
       const response = await fetch('/api/join', {
@@ -102,7 +131,7 @@ export default function ClubsPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          clubIds: Array.from(selectedClubs),
+          clubIds: selectedClubIds,
         }),
       })
 
@@ -185,7 +214,11 @@ export default function ClubsPage() {
               disabled={isApplying}
               className="bg-brand-pink hover:bg-brand-pink/90 text-white px-6 py-3 rounded-full shadow-lg"
             >
-              {isApplying ? 'Applying...' : `Apply to ${selectedClubs.size} Club${selectedClubs.size > 1 ? 's' : ''}`}
+              {isApplying
+                ? 'Applying...'
+                : selectedClubs.size === 1
+                  ? 'Continue to Application'
+                  : `Apply to ${selectedClubs.size} Clubs`}
             </Button>
           </motion.div>
         )}

@@ -17,6 +17,8 @@ const YEAR_GROUPS = [
 export default function ProfileSetup() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [studentName, setStudentName] = useState('');
+  const [studentId, setStudentId] = useState('');
   const [yearGroup, setYearGroup] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,9 +40,40 @@ export default function ProfileSetup() {
     checkProfile();
   }, [session, status, router, checkProfile]);
 
+  useEffect(() => {
+    if (session?.user?.name && !studentName) {
+      setStudentName(session.user.name);
+    }
+  }, [session, studentName]);
+
+  const validationError = useCallback(() => {
+    const trimmedName = studentName.trim();
+    const trimmedStudentId = studentId.trim();
+
+    if (!trimmedName || trimmedName.length < 2) {
+      return 'Please enter your full name.';
+    }
+
+    if (!/^\d{5}$/.test(trimmedStudentId)) {
+      return 'Student ID must be exactly 5 digits.';
+    }
+
+    if (!yearGroup || yearGroup < 7 || yearGroup > 13) {
+      return 'Please select your year group.';
+    }
+
+    return null;
+  }, [studentName, studentId, yearGroup]);
+
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!session?.user?.id || !yearGroup) return;
+    if (!session?.user?.id) return;
+
+    const formError = validationError();
+    if (formError) {
+      setError(formError);
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -48,7 +81,11 @@ export default function ProfileSetup() {
     const res = await fetch('/api/profile', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ year_group: yearGroup }),
+      body: JSON.stringify({
+        student_name: studentName.trim(),
+        student_id: studentId.trim(),
+        year_group: yearGroup,
+      }),
     });
 
     if (!res.ok) {
@@ -60,14 +97,7 @@ export default function ProfileSetup() {
     }
 
     setLoading(false);
-  }, [session, yearGroup, router]);
-
-  useEffect(() => {
-    if (yearGroup && !loading) {
-      // Auto-submit when year group is selected
-      handleSubmit({ preventDefault: () => {} } as any);
-    }
-  }, [yearGroup, loading, handleSubmit]);
+  }, [session, validationError, studentName, studentId, yearGroup, router]);
 
   if (status === 'loading') {
     return (
@@ -90,6 +120,36 @@ export default function ProfileSetup() {
           </h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-white/80 mb-2">
+                Student name
+              </label>
+              <input
+                type="text"
+                value={studentName}
+                onChange={(e) => setStudentName(e.target.value)}
+                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-brand-purple/50"
+                placeholder="Enter your full name"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-white/80 mb-2">
+                Student ID
+              </label>
+              <input
+                type="text"
+                value={studentId}
+                onChange={(e) => setStudentId(e.target.value.replace(/\D/g, '').slice(0, 5))}
+                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-brand-purple/50"
+                placeholder="e.g. 12345"
+                inputMode="numeric"
+                pattern="[0-9]{5}"
+                required
+              />
+            </div>
+
             <div>
               <label className="block text-white/80 mb-2">
                 What year group are you in?
@@ -115,7 +175,7 @@ export default function ProfileSetup() {
 
             <button
               type="submit"
-              disabled={loading || !yearGroup}
+              disabled={loading}
               className="w-full bg-brand-purple hover:bg-brand-purple/80 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 px-4 rounded-lg font-medium transition-colors"
             >
               {loading ? 'Saving...' : 'Continue'}

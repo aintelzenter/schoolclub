@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { createClient } from '@supabase/supabase-js';
 import { authOptions } from '@/lib/auth';
-import { isAdminEmail } from '@/lib/admin';
-import clubs from '@/data/clubs.json';
+import { getClubManagerAccess } from '@/lib/access';
+import { getClubsFromStore } from '@/lib/clubs-store';
 
 export const dynamic = 'force-dynamic';
 
@@ -76,7 +76,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  if (!isAdminEmail(session.user.email)) {
+  const access = await getClubManagerAccess(session.user.email);
+  if (!access || (!access.isAdmin && !access.isTeacher)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -106,7 +107,16 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid yearGroup' }, { status: 400 });
   }
 
+  if (!access.isAdmin && groupBy !== 'club') {
+    return NextResponse.json({ error: 'Teachers can only export by club' }, { status: 403 });
+  }
+
+  if (!access.isAdmin && clubId && !access.managedClubIds.includes(clubId)) {
+    return NextResponse.json({ error: 'You can only export applications for your assigned clubs' }, { status: 403 });
+  }
+
   const supabase = getAdminClient();
+  const clubs = await getClubsFromStore();
 
   let query = supabase
     .from('applications')

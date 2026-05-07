@@ -17,7 +17,7 @@ export default function SignIn() {
         const res = await fetch('/api/profile/me');
         if (res.ok) {
           const data = await res.json();
-          if (data?.year_group) {
+          if (data?.year_group && data?.student_name && data?.student_id) {
             router.push('/');
           } else {
             router.push('/profile/setup');

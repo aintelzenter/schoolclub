@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Container } from '@/components/ui/Container';
 import { Button } from '@/components/ui/Button';
 import { Loader2 } from 'lucide-react';
-import clubs from '@/data/clubs.json';
+import { fetchClubs } from '@/lib/data';
+import type { Club } from '@/lib/types/club';
 
 type PendingApplication = {
   id: string;
@@ -26,6 +27,7 @@ export default function AdminApplicationsPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [items, setItems] = useState<PendingApplication[]>([]);
+  const [access, setAccess] = useState<{ isAdmin: boolean; isTeacher: boolean; managedClubIds: string[] } | null>(null);
   const [notesById, setNotesById] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,28 +36,31 @@ export default function AdminApplicationsPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkLoading, setBulkLoading] = useState(false);
   const [bulkNotes, setBulkNotes] = useState('');
+  const [clubs, setClubs] = useState<Club[]>([]);
   const [exportYearGroup, setExportYearGroup] = useState<number>(7);
-  const [exportClubId, setExportClubId] = useState<string>(clubs[0]?.id ?? '');
+  const [exportClubId, setExportClubId] = useState<string>('');
   const [exportStatusScope, setExportStatusScope] = useState<'pending' | 'all'>('pending');
 
   const sessionEmail = useMemo(() => session?.user?.email ?? '', [session]);
 
-  useEffect(() => {
-    if (status === 'loading') return;
-    if (!session) {
-      router.push('/auth/signin');
-      return;
-    }
-
-    void fetchPending();
-  }, [session, status, router]);
-
-  async function fetchPending() {
+  const fetchPending = useCallback(async () => {
     setLoading(true);
     setError(null);
     setSuccess(null);
 
-    const res = await fetch('/api/admin/applications', { cache: 'no-store' });
+    const [accessRes, res] = await Promise.all([
+      fetch('/api/access', { cache: 'no-store' }),
+      fetch('/api/admin/applications', { cache: 'no-store' }),
+    ]);
+
+    if (accessRes.ok) {
+      const accessData = await accessRes.json();
+      setAccess({
+        isAdmin: Boolean(accessData?.isAdmin),
+        isTeacher: Boolean(accessData?.isTeacher),
+        managedClubIds: Array.isArray(accessData?.managedClubIds) ? accessData.managedClubIds : [],
+      });
+    }
 
     if (res.status === 401) {
       router.push('/auth/signin');
@@ -63,7 +68,7 @@ export default function AdminApplicationsPage() {
     }
 
     if (res.status === 403) {
-      setError('You are signed in, but your account is not allowed to access admin approvals.');
+      setError('You are signed in, but your account is not allowed to review club applications.');
       setLoading(false);
       return;
     }
@@ -78,7 +83,42 @@ export default function AdminApplicationsPage() {
     setItems(data);
     setSelectedIds(new Set());
     setLoading(false);
-  }
+  }, [router]);
+
+  useEffect(() => {
+    if (status === 'loading') return;
+    if (!session) {
+      router.push('/auth/signin');
+      return;
+    }
+
+    void fetchPending();
+  }, [session, status, router, fetchPending]);
+
+  useEffect(() => {
+    const loadClubs = async () => {
+      const all = await fetchClubs()
+      setClubs(all)
+    }
+
+    void loadClubs()
+  }, [])
+
+  useEffect(() => {
+    const availableClubIds = clubs
+      .filter((club) => club.id !== 'blank')
+      .filter((club) => access?.isAdmin || access?.managedClubIds.includes(club.id))
+      .map((club) => club.id);
+
+    if (availableClubIds.length === 0) {
+      setExportClubId('');
+      return;
+    }
+
+    if (!availableClubIds.includes(exportClubId)) {
+      setExportClubId(availableClubIds[0]);
+    }
+  }, [access, exportClubId, clubs]);
 
   async function updateStatus(id: string, newStatus: 'approved' | 'rejected') {
     setSavingId(id);
@@ -191,9 +231,16 @@ export default function AdminApplicationsPage() {
       <Container size="narrow">
         <div className="space-y-6">
           <header>
-            <h1 className="text-3xl font-bold text-white">Admin Applications</h1>
-            <p className="text-white/70 mt-2">Review pending club requests and approve or reject them.</p>
+            <h1 className="text-3xl font-bold text-white">Application Review</h1>
+            <p className="text-white/70 mt-2">
+              {access?.isAdmin
+                ? 'Review pending club requests and approve or reject them.'
+                : 'Review applications for the clubs assigned to you.'}
+            </p>
             <p className="text-white/50 text-sm mt-1">Signed in as: {sessionEmail || 'Unknown user'}</p>
+            <div className="mt-3">
+              <Button href="/admin/clubs" variant="outline" size="sm">Manage Clubs</Button>
+            </div>
           </header>
 
           {error && (
@@ -259,7 +306,9 @@ export default function AdminApplicationsPage() {
           <div className="bg-white/5 border border-white/10 rounded-lg p-5 space-y-4">
             <h2 className="text-lg font-semibold text-white">CSV Downloads</h2>
             <p className="text-white/70 text-sm">
-              Download application CSV files grouped by year group or by club.
+              {access?.isAdmin
+                ? 'Download application CSV files grouped by year group or by club.'
+                : 'Download application CSV files for the clubs assigned to you.'}
             </p>
 
             <div className="space-y-2">
@@ -275,6 +324,7 @@ export default function AdminApplicationsPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {access?.isAdmin && (
               <div className="space-y-2">
                 <label className="block text-white/70 text-sm">By Year Group</label>
                 <div className="flex gap-2">
@@ -290,6 +340,7 @@ export default function AdminApplicationsPage() {
                   <Button onClick={downloadYearCsv} variant="outline">Download</Button>
                 </div>
               </div>
+              )}
 
               <div className="space-y-2">
                 <label className="block text-white/70 text-sm">By Club</label>
@@ -301,6 +352,7 @@ export default function AdminApplicationsPage() {
                   >
                     {clubs
                       .filter((club) => club.id !== 'blank')
+                      .filter((club) => access?.isAdmin || access?.managedClubIds.includes(club.id))
                       .map((club) => (
                         <option key={club.id} value={club.id} className="text-black">{club.name}</option>
                       ))}

@@ -10,7 +10,18 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
+  const studentName = typeof body.student_name === 'string' ? body.student_name.trim() : '';
+  const studentId = typeof body.student_id === 'string' ? body.student_id.trim() : '';
   const yearGroup = Number(body.year_group);
+
+  if (!studentName || studentName.length < 2) {
+    return NextResponse.json({ error: 'Invalid student name' }, { status: 400 });
+  }
+
+  if (!/^\d{5}$/.test(studentId)) {
+    return NextResponse.json({ error: 'Invalid student ID' }, { status: 400 });
+  }
+
   if (!yearGroup || yearGroup < 7 || yearGroup > 13) {
     return NextResponse.json({ error: 'Invalid year group' }, { status: 400 });
   }
@@ -22,7 +33,15 @@ export async function POST(request: Request) {
 
   const { error } = await supabaseAdmin
     .from('profiles')
-    .upsert({ id: session.user.id, year_group: yearGroup }, { onConflict: 'id' });
+    .upsert(
+      {
+        id: session.user.id,
+        student_name: studentName,
+        student_id: studentId,
+        year_group: yearGroup,
+      },
+      { onConflict: 'id' }
+    );
 
   if (error) {
     console.error('Profile upsert failed:', error);

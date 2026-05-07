@@ -1,6 +1,7 @@
 'use client'
 
-import { getFeaturedClubs } from '@/lib/data'
+import { fetchClubs, getFeaturedClubs } from '@/lib/data'
+import { Club } from '@/lib/types/club'
 import { motion } from 'framer-motion'
 import { useRef, useState, useEffect } from 'react'
 import { ClubCard } from '../clubs/ClubCard'
@@ -10,7 +11,7 @@ import { Section } from '../ui/Section'
 
 export function FeaturedClubs() {
   const scrollRef = useRef<HTMLDivElement>(null)
-  const clubs = getFeaturedClubs()
+  const [clubs, setClubs] = useState<Club[]>(getFeaturedClubs())
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
 
@@ -21,6 +22,15 @@ export function FeaturedClubs() {
       setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10)
     }
   }
+
+  useEffect(() => {
+    const loadFeatured = async () => {
+      const all = await fetchClubs()
+      setClubs(all.slice(0, 6))
+    }
+
+    void loadFeatured()
+  }, [])
 
   useEffect(() => {
     checkScroll()

@@ -44,3 +44,15 @@ export function getFeaturedClubs(): Club[] {
   return getClubs().slice(0, 6)
 }
 
+export async function fetchClubs(): Promise<Club[]> {
+  const res = await fetch('/api/clubs', { cache: 'no-store' })
+  if (!res.ok) return getClubs()
+  return (await res.json()) as Club[]
+}
+
+export async function fetchClubById(id: string): Promise<Club | undefined> {
+  const res = await fetch(`/api/clubs/${encodeURIComponent(id)}`, { cache: 'no-store' })
+  if (!res.ok) return getClubById(id)
+  return (await res.json()) as Club
+}
+

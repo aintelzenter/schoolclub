@@ -18,7 +18,8 @@ import {
   getCategoryLayout,
 } from '@/lib/clubCategory'
 import { getClubType } from '@/lib/clubTypes'
-import { getClubById } from '@/lib/data'
+import { fetchClubById } from '@/lib/data'
+import { Club } from '@/lib/types/club'
 import { truncateAtSentence } from '@/lib/textUtils'
 import { cn } from '@/lib/utils/cn'
 import {
@@ -187,7 +188,8 @@ const DOE_MEDAL_ICONS: Record<DoeAwardLevel, React.ReactNode> = {
 export default function ClubDetailPage() {
   const params = useParams()
   const clubId = params.id as string
-  const club = getClubById(clubId)
+  const [club, setClub] = useState<Club | null>(null)
+  const [clubLoading, setClubLoading] = useState(true)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState(0)
   const [doeJourneySheetOpen, setDoeJourneySheetOpen] = useState(false)
@@ -195,15 +197,46 @@ export default function ClubDetailPage() {
   const [schoolShowProduction, setSchoolShowProduction] = useState<SchoolShowProduction>('frozen')
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   const [effectsEnabled, setEffectsEnabled] = useState(true)
-  if (!club) notFound()
+  useEffect(() => {
+    const loadClub = async () => {
+      const value = await fetchClubById(clubId)
+      setClub(value ?? null)
+      setClubLoading(false)
+    }
 
-  const category = getClubCategory(club.id)
+    void loadClub()
+  }, [clubId])
+
+  const clubData: Club = club ?? {
+    id: '',
+    name: '',
+    tagline: '',
+    description: '',
+    meetingDay: '',
+    meetingTime: '',
+    location: '',
+    yearGroup: '',
+    yearGroupMin: 7,
+    yearGroupMax: 13,
+    leaders: [],
+    teachers: [],
+    contact: '',
+    specialConditions: null,
+    questions: [],
+    roles: [],
+    accepting: false,
+    image: '',
+    images: [],
+    applicationQuestionsRaw: null,
+  }
+
+  const category = getClubCategory(clubData.id)
   const layout = getCategoryLayout(category)
-  const tintRgb = getClubTintRgb(club.id)
-  const tintHex = getClubTintHex(club.id)
-  const clubType = getClubType(club.id)
-  const isDuke = club.id === 'duke-of-edinburgh'
-  const isSchoolShow = club.id === 'school-show'
+  const tintRgb = getClubTintRgb(clubData.id)
+  const tintHex = getClubTintHex(clubData.id)
+  const clubType = getClubType(clubData.id)
+  const isDuke = clubData.id === 'duke-of-edinburgh'
+  const isSchoolShow = clubData.id === 'school-show'
   const doeTheme = isDuke ? DOE_THEMES[doeLevel] : null
   const schoolShowTheme = isSchoolShow ? SCHOOL_SHOW_THEMES[schoolShowProduction] : null
   const sectionAccentHex = isSchoolShow && schoolShowTheme
@@ -243,10 +276,10 @@ export default function ClubDetailPage() {
 
   const mainImage = (isSchoolShow && schoolShowImages[0])
     ? schoolShowImages[0]
-    : club.image || (club.images && club.images[0]) || ''
+    : clubData.image || (clubData.images && clubData.images[0]) || ''
   const galleryImages = isSchoolShow
     ? schoolShowImages
-    : (club.images && club.images.length > 0 ? club.images : mainImage ? [mainImage] : [])
+    : (clubData.images && clubData.images.length > 0 ? clubData.images : mainImage ? [mainImage] : [])
 
   const HEADER_BACKGROUND_IMAGE: Partial<Record<string, string>> = {
     'duke-of-edinburgh': '/clubs/PHOTOS/Duke of Edinburgh/Mainduke.JPG',
@@ -257,7 +290,7 @@ export default function ClubDetailPage() {
   }
   const headerBackgroundImage = isSchoolShow
       ? (schoolShowImages[0] || null)
-      : (HEADER_BACKGROUND_IMAGE[club.id] ?? (mainImage || null))
+      : (HEADER_BACKGROUND_IMAGE[clubData.id] ?? (mainImage || null))
 
   const HEADER_BACKGROUND_POSITION: Partial<Record<string, string>> = {
     'duke-of-edinburgh': '28% 50%',
@@ -268,7 +301,7 @@ export default function ClubDetailPage() {
   }
   const headerBackgroundPosition = isSchoolShow
     ? '50% 50%'
-    : (HEADER_BACKGROUND_POSITION[club.id] ?? '50% 50%')
+    : (HEADER_BACKGROUND_POSITION[clubData.id] ?? '50% 50%')
 
   const needsDarkText = useMemo(() => {
     if (isDuke && doeTheme) return true
@@ -294,8 +327,8 @@ export default function ClubDetailPage() {
 
   const ABOUT_TRUNCATE_CHARS = 280
   const { text: aboutTruncated, wasTruncated: aboutNeedsExpand } = useMemo(
-    () => (club.description ? truncateAtSentence(club.description, ABOUT_TRUNCATE_CHARS) : { text: '', wasTruncated: false }),
-    [club.description]
+    () => (clubData.description ? truncateAtSentence(clubData.description, ABOUT_TRUNCATE_CHARS) : { text: '', wasTruncated: false }),
+    [clubData.description]
   )
   const [aboutExpanded, setAboutExpanded] = useState(false)
   useEffect(() => {
@@ -315,7 +348,7 @@ export default function ClubDetailPage() {
     }
   }, [tintRgb.r, tintRgb.g, tintRgb.b, isDuke, doeTheme, isSchoolShow, schoolShowTheme])
 
-  const displayName = club.displayName || club.name
+  const displayName = clubData.displayName || clubData.name
   const effectiveTintHex = isSchoolShow && schoolShowTheme
     ? schoolShowTheme.accent
     : isDuke && doeTheme
@@ -354,6 +387,12 @@ export default function ClubDetailPage() {
         ['--schoolshow-shadow' as string]: schoolShowTheme.shadow,
       }
     : undefined
+
+  if (clubLoading) {
+    return <div className="min-h-screen bg-brand-deep" />
+  }
+
+  if (!club) notFound()
 
   return (
     <div

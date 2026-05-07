@@ -2,10 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { createClient } from '@supabase/supabase-js'
-import { Resend } from 'resend'
-import clubs from '@/data/clubs.json'
-
-const resend = new Resend(process.env.RESEND_API_KEY)
+import { sendEmail } from '@/lib/email'
+import { getClubsFromStore } from '@/lib/clubs-store'
 
 function normalizeYearGroup(value: unknown): number | null {
   if (typeof value === 'number' && Number.isFinite(value)) return value
@@ -52,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('year_group')
+      .select('student_name, student_id, year_group')
       .eq('id', session.user.id)
       .single()
 
@@ -71,6 +69,15 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    if (!profile?.student_name || !profile?.student_id) {
+      return NextResponse.json(
+        { error: 'Profile student name and student ID are required before applying to clubs' },
+        { status: 400 }
+      )
+    }
+
+    const clubs = await getClubsFromStore()
 
     const invalidClubIds = clubIds.filter((clubId) => !clubs.some((club) => club.id === clubId))
     if (invalidClubIds.length > 0) {
@@ -150,7 +157,7 @@ export async function POST(request: NextRequest) {
     // Send email notification if any applications were created
     if (appliedClubs.length > 0) {
       try {
-        await resend.emails.send({
+        await sendEmail({
           from: 'ANSxtra <noreply@ansxtra.com>',
           to: 'chinthakag@amnuaysilpa.ac.th',
           subject: `New Club Application: ${session.user.name}`,

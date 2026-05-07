@@ -31,23 +31,45 @@ export function Header() {
   const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [managementAccess, setManagementAccess] = useState<{ isAdmin: boolean; isTeacher: boolean } | null>(null)
   const { data: session, status } = useSession()
 
-  const isAdmin = useMemo(() => {
-    const email = session?.user?.email?.toLowerCase()
-    if (!email) return false
+  useEffect(() => {
+    let cancelled = false
 
-    const allowed = (process.env.NEXT_PUBLIC_ADMIN_EMAILS ?? '')
-      .split(',')
-      .map((v) => v.trim().toLowerCase())
-      .filter(Boolean)
+    async function loadAccess() {
+      if (!session?.user?.email) {
+        if (!cancelled) setManagementAccess(null)
+        return
+      }
 
-    return allowed.includes(email)
+      const res = await fetch('/api/access', { cache: 'no-store' })
+      if (!res.ok) {
+        if (!cancelled) setManagementAccess(null)
+        return
+      }
+
+      const data = await res.json()
+      if (!cancelled) {
+        setManagementAccess({
+          isAdmin: Boolean(data?.isAdmin),
+          isTeacher: Boolean(data?.isTeacher),
+        })
+      }
+    }
+
+    void loadAccess()
+
+    return () => {
+      cancelled = true
+    }
   }, [session?.user?.email])
 
+  const canManageClubs = Boolean(managementAccess?.isAdmin || managementAccess?.isTeacher)
+
   const visibleNavLinks = useMemo(
-    () => (isAdmin ? [...navLinks, { href: '/admin/applications', label: 'Admin' }] : navLinks),
-    [isAdmin]
+    () => (canManageClubs ? [...navLinks, { href: '/admin/applications', label: 'Manage Clubs' }] : navLinks),
+    [canManageClubs]
   )
 
   useEffect(() => {
